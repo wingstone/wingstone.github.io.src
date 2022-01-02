@@ -10,6 +10,7 @@ isTop: false
 ## 管线介绍
 
 所谓管线就是一个流程，针对硬件来说，处理一个图元有一个硬件渲染流程**Graphic Pipeline（图形管线）**；针对实际应用来说，渲染一帧画面也需要一个渲染流程**Render Pipeline/Path（渲染管线/路径）**；Graphic Pipeline处于更加低级的渲染层次，是渲染一个物体必走的渲染流程；
+<!--more-->
 
 ## GPU Graphic Pipeline
 

@@ -8,6 +8,7 @@ feature:
 isTop: false
 ---
 移动GPU架构经常被称之为TBDR（Tiled Based Deferred Rendering），我们这里也以TBDR代称；实际上移动架构有TBR与TBDR两种，为什么都被称之为TBDR，可以看这篇[文章](https://zhuanlan.zhihu.com/p/112120206)；我们这里使用TBDR来指整个移动GPU架构都包含的TBR特点；
+<!--more-->
 
 ## 移动TBDR架构与桌面IMR架构
 

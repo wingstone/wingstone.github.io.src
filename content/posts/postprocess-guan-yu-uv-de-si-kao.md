@@ -8,6 +8,7 @@ feature:
 isTop: false
 ---
 以前一直以为屏幕空间下的UV应该是0-1的范围内的；
+<!--more-->
 
 ## Blit操作下的PostProcess
 

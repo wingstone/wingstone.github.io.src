@@ -9,6 +9,7 @@ isTop: false
 ---
 
 C++中的一些细节问题
+<!--more-->
 
 ## C语言中的static关键字
 

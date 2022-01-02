@@ -8,6 +8,7 @@ feature:
 isTop: false
 ---
 FXAA是基于图像空间理论的抗拒齿方法；
+<!--more-->
 
 ## 基础理论为：
 

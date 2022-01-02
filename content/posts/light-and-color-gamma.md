@@ -7,6 +7,10 @@ hideInList: false
 feature: 
 isTop: false
 ---
+
+颜色空间介绍
+<!--more-->
+
 # 前言
 
 在图形开发中，总绕不开的一个名词，Gamma，这里会对Gamma进行一个粗暴但是通俗的讲解；便于理清图形开发中理解Gamma的一切；

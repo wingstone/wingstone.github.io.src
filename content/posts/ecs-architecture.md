@@ -9,6 +9,7 @@ isTop: false
 ---
 
 ECS架构介绍
+<!--more-->
 
 ## ECS架构介绍
 

@@ -9,6 +9,7 @@ isTop: false
 ---
 
 OpenGL中关于插值问题
+<!--more-->
 
 ## OpenGL中关于插值问题
 

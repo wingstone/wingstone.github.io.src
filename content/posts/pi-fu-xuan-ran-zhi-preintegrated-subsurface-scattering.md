@@ -12,6 +12,7 @@ isTop: false
 2. 表面小凸起引起的散射（Small Surface Bumps）；
 3. 投影边缘引起的散射（Shadows）；
 4. 皮肤背面的透射问题（Translucency）（自己添加的）；
+<!--more-->
 
 ## Surface Curvature
 

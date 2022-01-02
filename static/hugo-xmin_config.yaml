@@ -1,6 +1,6 @@
 baseurl: "/"
 languageCode: "en-us"
-title: "A minimal Hugo website"
+title: "wingstone's blog"
 theme: "hugo-xmin"
 googleAnalytics: ""
 disqusShortname: ""
@@ -29,12 +29,12 @@ menu:
       url: "index.xml"
 
 params:
-  description: "A website built through Hugo and blogdown."
-  footer: "&copy; [Yihui Xie](https://yihui.org) 2017 -- {Year} | [Github](https://github.com/yihui) | [Twitter](https://twitter.com/xieyihui)"
+  description: "wingtone's blog website."
+  footer: "&copy; [wingstone](https://wingstone.github.io) 2020 -- {Year} | [Github](https://github.com/wingstone) | [Zhihu](https://www.zhihu.com/people/wu-zhu-32-40) | [Shadertoy](https://www.shadertoy.com/user/wingstone)"
 
 markup:
   highlight:
-    codeFences: false
+    codeFences: true
   goldmark:
     renderer:
       unsafe: true

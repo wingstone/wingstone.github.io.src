@@ -8,6 +8,9 @@ feature:
 isTop: false
 ---
 
+软阴影技术的各种实现以及个人理解；
+<!--more-->
+
 ## PCF（Percentage-Closer Filtering）
 
 就是对阴影结果进行滤波，这里的阴影结果指阴影测试函数所得的结果；一般采用双线性滤波，此时可以使用硬件PCF来进行插值；

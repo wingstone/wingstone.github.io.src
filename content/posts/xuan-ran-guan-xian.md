@@ -9,6 +9,7 @@ isTop: false
 ---
 
 Render Path称之为渲染路径更为合适，实际上指渲染一帧所要走的流程，这个流程主要用来处理光照，以及后处理等；常见的有Forward/Deferred Rendering；以及其改版Forward+、Tiled Based Deferred Rendering、Clustered Shading；以及更灵活的Frame Graph（寒霜引擎）、SRP（Unity引擎）；
+<!--more-->
 
 注意：在render之前，一般还会有一个Application stage，用以在CPU上运行一些必要的前置任务：如碰撞检测、全局加速算法（视锥剔除、遮挡剔除）、物理模拟、动画效果等等；处理完这些后，才能进行高效合理的渲染；
 

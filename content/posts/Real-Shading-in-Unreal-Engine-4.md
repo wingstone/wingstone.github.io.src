@@ -15,8 +15,6 @@ coverMeta: out
 本文主要讲述PBR在Unreal中的实现思路，主要涉及Material Model、Shading Model、Lighting Model的背后原理与经验总结；在文章最后，添加了我个人的理解与实现过程中的相关参考；
 <!--more-->
 
-# Real Shading in Unreal Engine 4
-
 ## 介绍
 
 想要切换到pbr工作流的原因：可以渲染出更加真实的照片，同时能极大地改善美术工作人员的工作流与工作质量。

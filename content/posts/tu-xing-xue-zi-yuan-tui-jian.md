@@ -7,6 +7,10 @@ hideInList: false
 feature: 
 isTop: false
 ---
+
+图形学学习资源推荐，包含了学习网站，学习书记，开源项目等等；
+<!--more-->
+
 ## 离线渲染
 
 1. [Physically Based Rendering:From Theory To Implementation](https://www.pbrt.org/index.html)：大名鼎鼎的《基于物理的渲染：从理论到实现》，离线学习必看，包含了各种光线追踪中用到的技术！官网还提供了第三版书籍的[网页版](http://www.pbr-book.org/)供免费看；

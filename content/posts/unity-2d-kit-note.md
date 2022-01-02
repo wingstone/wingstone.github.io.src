@@ -9,6 +9,7 @@ isTop: false
 ---
 
 介绍unity 2D Kit包中所用的一些组件；
+<!--more-->
 
 ## Sorting Group组件
 
