@@ -1,7 +1,7 @@
 baseurl = "/"
 title = "wingstone's blog"
 languageCode = "en-us"
-paginate = "15" # Number of elements per page in pagination
+paginate = "12" # Number of elements per page in pagination
 theme = "binario"
 disqusShortname = "" # Enable comments by entering your Disqus shortname
 googleAnalytics = "" # Enable Google Analytics by entering your tracking id
@@ -23,7 +23,6 @@ googleAnalytics = "" # Enable Google Analytics by entering your tracking id
   colorTheme = "" # dark-green, dark-blue, dark-red, dark-violet
   # customCSS = ["css/custom.css"] # Include custom CSS files
   # customJS = ["js/custom.js"] # Include custom JS files
-  mainMenuAlignment = "left" # Align main menu (desktop version) to the right side
   authorbox = true # Show authorbox at bottom of single pages if true
   comments = false # Enable comments for all site pages
   related = false # Enable Related content for single pages
@@ -32,6 +31,31 @@ googleAnalytics = "" # Enable Google Analytics by entering your tracking id
   mathjaxPath = "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.6/MathJax.js" # Specify MathJax path. Optional
   mathjaxConfig = "TeX-AMS-MML_HTMLorMML" # Specify MathJax config. Optional
   hideNoPostsWarning = false # Don't show no posts empty state warning in main page, if true
+
+
+# ------------
+# Sidebar menu, icon from https://fontawesome.com/v6.0
+# ------------
+[[menu.main]]
+  weight = 1
+  identifier = "home"
+  name = "Home"
+  url = "/"
+[[menu.main]]
+  weight = 2
+  identifier = "categories"
+  name = "Categories"
+  url = "/categories"
+[[menu.main]]
+  weight = 3
+  identifier = "tags"
+  name = "Tags"
+  url = "/tags"
+[[menu.main]]
+  weight = 4
+  identifier = "about"
+  name = "About"
+  url = "/about"
 
 [Params.Entry]
   meta = ["date", "categories"] # Enable meta fields in given order

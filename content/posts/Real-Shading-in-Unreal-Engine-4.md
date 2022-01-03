@@ -12,7 +12,7 @@ metaAlignment: center
 coverMeta: out
 ---
 
-本文主要讲述PBR在Unreal中的实现思路，主要涉及Material Model、Shading Model、Lighting Model的背后原理与经验总结；主要来自演讲[Real Shading in Unreal Engine 4](https://de45xmedrsdbp.cloudfront.net/Resources/files/2013SiggraphPresentationsNotes-26915738.pdf)；在文章最后，添加了我个人的理解与实现细节扩展；
+本文主要讲述PBR在Unreal中的实现思路，涉及Material Model、Shading Model、Lighting Model的背后原理与经验总结，来自演讲[Real Shading in Unreal Engine 4](https://de45xmedrsdbp.cloudfront.net/Resources/files/2013SiggraphPresentationsNotes-26915738.pdf)；在文章最后，添加了我个人的理解与实现细节扩展；
 <!--more-->
 
 ## 介绍
@@ -24,7 +24,7 @@ coverMeta: out
 1. Real-time performance，足够高效，满足实时渲染的帧率要求，（移动端还需考虑温度，耗电量要求）
 2. Reduced complexity，参数尽可能少，过多的参数会产生更多的试错成本与失误。由于要受到ibl与解析光源的光照，因此，参数参数必须具有跨光源下的统一性。
 3. Intuitive interface，简单易理解的接口，避免折射率这种物理数值。
-4. Perceptual Linearly，感知上线性，意味着参数blend后的结果要尽可能接近结果的blend；（个人感觉不太可能，pbr本身的计算并不是线性可插值的）
+4. Perceptual Linearly，感知上线性，意味着参数blend后的结果要尽可能接近结果的blend；（此项对感知依赖比较强，比如roughness的线性变化对应着主观感受上粗糙程度的线性变化）
 5. Easy to Master，易于精通，不需要理解太多技术即可完成物理可信的效果；
 6. Robust，意味着，不易产生不符合物理的效果，切多个参数的混合仍能获得物理可信效果；
 7. Expressive，富有表现力的，由于使用延迟管线，因此基础的光照模型需要表达真实世界约99%的材质；
@@ -56,11 +56,11 @@ $$
 D(h) = \frac{\alpha^2}{\pi((n \cdot h)^2(\alpha^2+1)+1)^2}
 $$
 
-这里采用Disney所使用的的重参数化做法，即$\alpha=Roughness^2$；这里的Roughness在Unity的实现中对应于参数perceptualRoughness；
+这里采用Disney所使用的的重参数化做法，即`$\alpha=Roughness^2$`；这里的Roughness在Unity的实现中对应于参数perceptualRoughness；
 
 #### Specular G
 
-G项对比下来，最终选用Schlick model，并且使用$k=\frac{\alpha}{2}$，如此来更好的逼近GGX中的Smith model；参考Disney的做法将Roughness重映射为$\frac{Roughness+1}{2}$来减少“hotness”，只适用于解析光源，对于ibl计算，由于是离线的，可直接使用smith model；
+G项对比下来，最终选用Schlick model，并且使用`$k=\frac{\alpha}{2}$`，如此来更好的逼近GGX中的Smith model；参考Disney的做法将Roughness重映射为`$\frac{Roughness+1}{2}$`来减少“hotness”，只适用于解析光源，对于ibl计算，由于是离线的，可直接使用smith model；
 
 $$
 k=\frac{(Roughness+1)^2}{8}
@@ -150,7 +150,7 @@ $$
 
 #### Pre-Filtered Environment Map
 
-对于light部分，我们采用GGX来进行filter，将不同粗糙度下的filter结果存放到mipmap level中；同时假设$n=v=l$，引入的误差，在filter过程中使用$cos\theta_{l_k}$来加权得到更好的效果；
+对于light部分，我们采用GGX来进行filter，将不同粗糙度下的filter结果存放到mipmap level中；同时假设`$n=v=l$`，引入的误差，在filter过程中使用`$cos\theta_{l_k}$`来加权得到更好的效果；
 
 ```c++
 float3 PrefilterEnvMap( float Roughness, float3 R )
@@ -177,13 +177,13 @@ float3 PrefilterEnvMap( float Roughness, float3 R )
 
 #### Environment BRDF
 
-第二项积分，可以认为是均匀白光下，对Specular brdf的积分，即$L_i(l_k)=1$；对于菲涅尔项，使用Schlick的形式：$F(v,h)=F_0+(1-F_0)(1-v\cdot h)^5$，我们可以发现，积分中$F_0$可以提取出来，即
+第二项积分，可以认为是均匀白光下，对Specular brdf的积分，即`$L_i(l_k)=1$`；对于菲涅尔项，使用Schlick的形式：`$F(v,h)=F_0+(1-F_0)(1-v\cdot h)^5$`，我们可以发现，积分中`$F_0$`可以提取出来，即
 
 $$
 \int_H {f(l,v)cos\theta_l} \,{\rm d}l= F_0\int_H {\frac{f(l,v)}{F(v,h)}(1-(1-v\cdot h)^5)cos\theta_l} \,{\rm d}l + \int_H {\frac{f(l,v)}{F(v,h)}(1-v\cdot h)^5cos\theta_l} \,{\rm d}l
 $$
 
-最后的积分公式只需要Roughness与$cos\theta_v$作为输入，$F_0$的scale与bias作为输出。由于输入为0到1的范围，可以很容易的使用2dlut来存储积分结果。
+最后的积分公式只需要Roughness与`$cos\theta_v$`作为输入，`$F_0$`的scale与bias作为输出。由于输入为0到1的范围，可以很容易的使用2dlut来存储积分结果。
 
 Unreal使用R16G16float的存储格式来存储，因为测试发现精度起着非常重要的作用。
 
@@ -323,9 +323,9 @@ Cone Intersection的实现不需要进行filter，一个较好的应用版本是
 
 ### Specular D Modification
 
-这是Unreal在[The Technology Behind the 3D Graphics and Games Course “Unreal Engine 4 Elemental demo”](https://de45xmedrsdbp.cloudfront.net/Resources/files/The_Technology_Behind_the_Elemental_Demo_16x9-1248544805.pdf)中所采用的技术；背后的理论为：认为光源的分布等同于某一Cone Angle下 $D(h)$ 的分布。光源分布与反射Cone之间的卷积等同于两个Cone角度的相加，从而生成新的cone；
+这是Unreal在[The Technology Behind the 3D Graphics and Games Course “Unreal Engine 4 Elemental demo”](https://de45xmedrsdbp.cloudfront.net/Resources/files/The_Technology_Behind_the_Elemental_Demo_16x9-1248544805.pdf)中所采用的技术；背后的理论为：认为光源的分布等同于某一Cone Angle下 `$D(h)$` 的分布。光源分布与反射Cone之间的卷积等同于两个Cone角度的相加，从而生成新的cone；
 
-为了达到这种假设，可将 $\alpha$ 转为对应Cone角度，然后加上光源对应的Cone角度，然后再重新转换为 $\alpha^\prime$ ，使用新的 $\alpha^\prime$ 来进行后续运算，即：
+为了达到这种假设，可将 `$\alpha$` 转为对应Cone角度，然后加上光源对应的Cone角度，然后再重新转换为 `$\alpha^\prime$` ，使用新的 `$\alpha^\prime$` 来进行后续运算，即：
 
 $$
 \alpha^\prime = saturate(\alpha + \frac{sourceRadius}{3*distance})
@@ -365,13 +365,13 @@ I_{sphere}
 \end{cases}
 $$
 
-这里$\phi_r$表示r与l之间的夹角，$\phi_a$表示球形光源对应的Cone angle；此时点光源是归一化的，积分和为1，球形光很明显将不再归一化；为了近似这种能量的增长，我们使用类似前面提到的 **Specular D Modification** ，对于GGX，归一化因子为$\frac{1}{\pi \alpha^2}$，对于Representative Point的归一化，unreal使用新的拓宽后归一化因子除以原始点光下的归一化因子，即
+这里`$\phi_r$`表示r与l之间的夹角，`$\phi_a$`表示球形光源对应的Cone angle；此时点光源是归一化的，积分和为1，球形光很明显将不再归一化；为了近似这种能量的增长，我们使用类似前面提到的 **Specular D Modification** ，对于GGX，归一化因子为`$\frac{1}{\pi \alpha^2}$`，对于Representative Point的归一化，unreal使用新的拓宽后归一化因子除以原始点光下的归一化因子，即
 
 $$
 SphereNormalization = (\frac{\alpha}{\alpha \prime})^2
 $$
 
-如此便能得到满足Unreal前面三个要求的计算方法，其中$\alpha\prime$的计算与光源的位置及形状有关，与 **Specular D Modification** 方法中的不太一致，实现需要参考源码，原文中没有提及；
+如此便能得到满足Unreal前面三个要求的计算方法，其中`$\alpha\prime$`的计算与光源的位置及形状有关，与 **Specular D Modification** 方法中的不太一致，实现需要参考源码，原文中没有提及；
 
 ### Tube Lights
 
@@ -382,7 +382,7 @@ t = \frac{(r\cdot L_0)(r\cdot L_d) - (L_0\cdot L_d)}{|L_d|^2-(r\cdot L_d)^2} \\
 l = ||L_0+saturate(t)L_d||
 $$
 
-为了保证能量守恒，使用类似于针对球形光源的方法，Specular的分布是由光源拓宽的，而linear light是一维的，因此我们可以使用anisotropic GGX的归一化因子$\frac{1}{\pi \alpha_x\alpha_y}$，这里$\alpha_x=\alpha_y=\alpha$，因此Representative Point的归一化为：
+为了保证能量守恒，使用类似于针对球形光源的方法，Specular的分布是由光源拓宽的，而linear light是一维的，因此我们可以使用anisotropic GGX的归一化因子`$\frac{1}{\pi \alpha_x\alpha_y}$`，这里`$\alpha_x=\alpha_y=\alpha$`，因此Representative Point的归一化为：
 
 $$
 LineNormalizetion = \frac{\alpha}{\alpha \prime}
@@ -442,7 +442,7 @@ float SphereHorizonCosWrap( float NoL, float SinAlphaSqr )
 	return NoL;
 }
 ```
-3. 能量守恒同样只针对于Speculer部分，对于normalize需要的$$\alpha \prime$$的计算，源码中给出了不一样的计算方法，与modified D distribution方法中的计算方式不同；
+3. 能量守恒同样只针对于Speculer部分，对于normalize需要的 $$\alpha \prime$$ 的计算，源码中给出了不一样的计算方法，与modified D distribution方法中的计算方式不同；
 ```c++
 // Engine/Shaders/Private/ShadingModels.ush
 float New_a2( float a2, float SinAlpha, float VoH )

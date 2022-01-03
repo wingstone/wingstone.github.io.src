@@ -6,6 +6,9 @@
     <title>{{ .Title }} | {{ .Site.Title }}</title>
     <link rel="stylesheet" href="{{ "/css/style.css" | relURL }}" />
     <link rel="stylesheet" href="{{ "/css/fonts.css" | relURL }}" />
+    <link rel="icon" href="{{ with .Site.Params.favicon }}{{ . | absURL }}{{ else }}/favicon.png{{ end }}">
+    <!-- <link rel="icon" href="{{ "icons/16.png" | relURL }}" sizes="16x16" type="image/png"> -->
+    <!-- <link rel="icon" href="{{ "icons/32.png" | relURL }}" sizes="32x32" type="image/png"> -->
     {{ partial "head_custom.html" . }}
   </head>
 

@@ -1,0 +1,27 @@
+{{ partial "header.html" . }}
+
+<div>
+    <h1>{{ .Title }}</h1>
+  
+    {{ with .Site.GetPage "section" "posts" }}
+      {{ range .Data.Pages.GroupByDate "2006" }}
+      
+      <section>
+        <h3>{{ .Key }}</h3>
+        <ul>
+          {{ range .Pages }}
+            <li>
+                {{ .PublishDate.Format "2006-01-02" }}
+                ->
+                <a href="{{ .Permalink }}" class="permalink">{{ .Title }}</a>
+            </li>
+          {{ end }}
+        </ul>
+      </section>
+  
+      {{ end }}
+    {{ end }}
+  
+  </div>
+
+{{ partial "footer.html" . }}

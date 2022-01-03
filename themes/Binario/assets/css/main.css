@@ -319,8 +319,9 @@ button:not(:-moz-focusring):focus > .main-nav__btn-box {
 		border-left: 0;
 	}
 
-	.main-nav--right {
+	.main-nav--center {
 		margin-left: auto;
+		margin-right: auto;
 	}
 
 	.main-nav__list.main-nav__list--active {
