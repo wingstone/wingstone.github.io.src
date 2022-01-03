@@ -1,11 +1,11 @@
 ---
-title: '[Light and Color] Gamma'
+title: 'Gamma'
 date: 2021-06-26 21:11:24
-tags: []
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- Light&Color
+tags: 
+- 总结
+- Gamma
 ---
 
 颜色空间介绍
@@ -17,7 +17,7 @@ isTop: false
 
 # 一、Gamma是什么？
 
-Gamma是什么，Gamma FAQ[<sup>[1]</sup>](#refer-anchor)中有解释：在传统的CRT显示器中，屏幕显示的Luminance与电压并不是成正比的关系，而是成一个幂次方的关系，即$L = V^\gamma$，其中的幂就是我们通说所说的Gamma；
+Gamma是什么，Gamma FAQ[<sup>[1]</sup>](#refer-anchor)中有解释：在传统的CRT显示器中，屏幕显示的Luminance与电压并不是成正比的关系，而是成一个幂次方的关系，即`$L = V^\gamma$`，其中的幂就是我们通说所说的Gamma；
 ![Gamma变换](https://img-blog.csdnimg.cn/20210623234248419.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3FxXzM1ODE3NzAw,size_16,color_FFFFFF,t_70#pic_center =256x256)
 <center>显示器的Gamma变换</center>
 

@@ -1,18 +1,20 @@
 ---
 title: '移动GPU架构'
 date: 2020-09-17 13:30:09
-tags: [图形学,GPU]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- GPU
+tags: 
+- 总结
+- Mobile
+- GPU
 ---
-移动GPU架构经常被称之为TBDR（Tiled Based Deferred Rendering），我们这里也以TBDR代称；实际上移动架构有TBR与TBDR两种，为什么都被称之为TBDR，可以看这篇[文章](https://zhuanlan.zhihu.com/p/112120206)；我们这里使用TBDR来指整个移动GPU架构都包含的TBR特点；
+移动GPU架构经常被称之为TBDR（Tiled Based Deferred Rendering），我们这里也以TBDR代称；移动架构有TBR与TBDR两种，但实际上两者之间差别没那么大，所以这里拿TBDR来做统一介绍；
 <!--more-->
 
 ## 移动TBDR架构与桌面IMR架构
 
 ### IMR架构
+
 IMR（Immediate Mode Rendering）就如字面意思一样，提交的每个渲染命令都会立即开始执行，并且该渲染命令会在整条流水线中执行完毕后才开始执行下一个渲染命令。
 
 IMR的渲染会存在浪费带宽的情况。例如，当两次渲染有前后遮蔽关系时，IMR模式因为两次draw命令都要执行，因此会存在经过Pixel Shader后的Pixel被Depth test抛弃，这样就浪费了Shader Unit运算能力。不过幸运的是，目前几乎所有的IMR架构的GPU都会提供Early Z的判断方式，一般是在Rasterizer里面对图形的遮蔽关系进行判断，如果需要渲染的图形被遮挡住，那么就直接抛弃该图形而不需要执行Pixel Shader。
@@ -27,7 +29,7 @@ IMR的另外一个缺点就是其渲染命令在执行需要随时读写frame bu
 
 **TBDR一般的实现策略**是对于cpu过来的commandbuffer，只对他们做vetex process，然后**对vs产生的结果暂时保存**，等待非得刷新整个FrameBuffer的时候，才真正的随这批绘制做光栅化，做tile-based-rendering。什么是非得刷新整个FrameBuffer的时候？比如Swap Back and Front Buffer，glflush，glfinish，glreadpixels，glcopytexiamge，glbitframebuffer，queryingocclusion，unbind the framebuffer。总之是所有gpu觉得不得不把这块FrameData绘制好的时候。
 
-FrameData这个是tbr特有的在gpu绘制时所需的存储数据，在powervr上叫做arguments buffer，在arm上叫做plolygon lists。
+FrameData这个是tbr特有的在gpu绘制时所需的存储数据，在powervr上叫做arguments buffer，在arm上叫做plolygon lists，高通叫bin buffer。
 
 于是移动端的gpu想到了一种化整为零的方法，把巨大的FrameBuffer分解成很多小块，使得每个小块可以被离gpu更近的那个SRAM可以容纳，块的多少取决于你的硬件的SRAM的大小。这样gpu可以分批的一块块的在SRAM上访问framebuffer，一整块都访问好了后整体转移回DRAM上。
 
@@ -37,22 +39,30 @@ FrameData这个是tbr特有的在gpu绘制时所需的存储数据，在powervr�
 
 ## TBDR的重要特性
 
-### 关于early-z
-因为tbdr有framedata队列，很多gpu会很聪明的尽量筛去不需要绘制的framedata。所以在tbdr上earlyz，或者stencil test这些是非常有益处的。例如你定义了一个stencil，gpu有可能在对framedata处理的过程中就筛掉了那些不能通过stencil的drawcall了。或者通过scissor test可能一整块tile都不需要绘制。
+### 关于bin buffer
 
-### blending和MSAA的效率其实很高，alpha-test效率很低
+在生成bin buffer时，会先运行一遍VS，为了得到屏幕坐标从而生成bin buffer；根据bin buffer执行draw call时，会再重新执行VS，PS；因此为了优化第一遍VS的效率，GPU会将VS中与transform不相关的工作分离开来（即SV_POSITION以外输出项的计算），从而优化binning的速度；此项为硬件层优化，无法介入；
+
+### 关于early-z
+
+#### Forward pixel kill
+
+这是我们平时最常了解到的early-z应用形式，在PC上也能看到；是一种在fragment层面上的提前深度测试剔除，即在光栅化后，shading之前进行z的测试，可以节省PS的开销；此项为硬件层优化，无法介入；
+
+#### Hidden surface removal
+
+这是triangle层面上的剔除，执行时间在光栅化之前，若剔除成功就不会执行光栅化及其之后所有的渲染流程，属于比较高效率的优化；此项为硬件层优化，无法介入；
+
+### 关于blending、MSAA、alpha-test
+
 回头看下tbdr的渲染管线，对于一个tile上所有pixel的绘制都是在on-chip的mem上的，只在最后绘制好了才整体回拷给dram。所以我们通常认为会造成大量带宽的操作，例如blending（对framebuffer的读和写），msaa(增加对framebuffer读取的次数)其实在tbdr上反而是非常快速的。（当然msaa除了会造成framebuffer访问增多，还会带来渲染像素的数量增多，这个是tbr没什么优化的）
 
-alpha-test这个东西，他对depth的写入是不能预先确定的，它必须等到pixel shader执行，这导致了alpha-test之后的那些framedata失去了early–z的机会，也就破坏了TBDR架构中的延迟渲染特性（FrameData必须进行ps处理，不能继续缓存），也就增加了渲染量。
+alpha-test这个东西，他对depth的写入是不能预先确定的，它必须等到pixel shader执行，这导致了alpha-test之后的那些framedata失去了early–z（Hidden surface removal）的机会，也就破坏了TBDR架构中的延迟渲染特性（FrameData必须进行ps处理，不能继续缓存），也就增加了渲染量。
 
-## 移动TBDR架构与Render Pipeline中TBDR的区别
-
-Render Pipeline中TBDR可以参考[这里](xuan-ran-guan-xian)；RP中的TBDR指的光照渲染流程中，延迟光照的一种；为了减少DC，提高硬件利用效率；**这里的延迟主要指**：PS阶段光照的计算不立即计算，而是渲染到G-buffer中进行缓存，到最后使用的新的DC来使用G-buffer进行光照的计算（主要用于多光源下的渲染处理）；
-
-移动TBDR架构指的是GPU所采用的的一种渲染架构，是GPU硬件上的延迟渲染流程的硬件实现；而且**这里的延迟渲染主要指**：VS到PS之间有一个硬件的framedata队列，来延迟PS的处理；
+而实际在项目使用中，MSAA仍是非常耗时的，因为对于depth需要多倍的binning及bin buffer，以及对应的内存；alpha blend也没那么高效，因为仍然会增加多倍的overdraw；alpha test消耗可能也没那么高，因为还有fragment层面的early-z存在，以及在PS中提前discard，还可以减少余下ps所带来的开销；
 
 ## Reference
 
-[移动架构浅析](https://gameinstitute.qq.com/community/detail/103959)
-[移动设备GPU架构知识汇总](https://zhuanlan.zhihu.com/p/112120206)
-[针对移动端TBDR架构GPU特性的渲染优化](https://gameinstitute.qq.com/community/detail/123220)
+1. [MOBILE GRAPHICS 101](https://community.arm.com/arm-community-blogs/b/graphics-gaming-and-vr-blog/posts/moving-mobile-graphics)
+2. [Mobile HW and Bandwidth](https://community.arm.com/arm-community-blogs/b/graphics-gaming-and-vr-blog/posts/moving-mobile-graphics)
+3. [针对移动端TBDR架构GPU特性的渲染优化](https://gameinstitute.qq.com/community/detail/123220)

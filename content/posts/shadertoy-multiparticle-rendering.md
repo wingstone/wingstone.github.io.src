@@ -1,11 +1,11 @@
 ---
 title: 'ShaderToy MultiParticle Rendering'
 date: 2020-01-11 14:31:41
-tags: [shadertoy]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- Shadertoy
+tags: 
+- Shadertoy
+- Particle
 ---
 
 在ShaderToy开发过程中，使用粒子可以极高的提升粒子效果，绘制粒子可以分为**粒子着色**以及**粒子范围的确定**，这篇文章主要讨论**粒子范围的确定**。

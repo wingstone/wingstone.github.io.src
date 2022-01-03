@@ -1,14 +1,14 @@
 ---
-title: ' ShaderToy Bloom Effect'
+title: 'ShaderToy Bloom Effect'
 date: 2020-01-11 14:29:03
-tags: [shadertoy]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- Shadertoy
+tags: 
+- Shadertoy
+- Bloom
 ---
 
- bloom效果的实现，在已知距离场的情况下，使用距离的倒数能渲染出接近bloom的效果
+ bloom效果的实现，在已知距离场的情况下，使用距离的倒数以及指数函数能渲染出接近bloom的效果；
 <!--more-->
 
 shader范例：

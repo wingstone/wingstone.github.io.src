@@ -442,7 +442,7 @@ float SphereHorizonCosWrap( float NoL, float SinAlphaSqr )
 	return NoL;
 }
 ```
-3. 能量守恒同样只针对于Speculer部分，对于normalize需要的 $$\alpha \prime$$ 的计算，源码中给出了不一样的计算方法，与modified D distribution方法中的计算方式不同；
+3. 能量守恒同样只针对于Speculer部分，对于normalize需要的 `$\alpha \prime$` 的计算，源码中给出了不一样的计算方法，与modified D distribution方法中的计算方式不同；
 ```c++
 // Engine/Shaders/Private/ShadingModels.ush
 float New_a2( float a2, float SinAlpha, float VoH )
@@ -630,7 +630,7 @@ half EnvBRDFApproxNonmetal( half Roughness, half NoV )
 }
 ```
 
-Unity针对移动平台的性能要求，提供了更为简化的EnvBRDF公式，此外Unity还提供了ggx brdf在移动平台的简化版，参考文章为[Moving Mobile Graphics]([https://](https://community.arm.com/arm-community-blogs/b/graphics-gaming-and-vr-blog/posts/moving-mobile-graphics))中的Optimizing PBR演讲；
+Unity针对移动平台的性能要求，提供了更为简化的EnvBRDF公式，此外Unity还提供了ggx brdf在移动平台的简化版，参考文章为[Moving Mobile Graphics](https://community.arm.com/arm-community-blogs/b/graphics-gaming-and-vr-blog/posts/moving-mobile-graphics)中的Optimizing PBR演讲；
 
 而unity在buildin管线及urp管线中，实际使用的EnvBRDF代码与以上代码并不一致，网上也找不到相应的文章参考，实际的代码实现为：
 ```c++
