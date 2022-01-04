@@ -486,7 +486,7 @@ float EnergyNormalization( inout float a2, float VoH, FAreaLight AreaLight )
 }
 
 ```
-4. 在计算Specular BRDF是时候，unreal参考了Decima Engine演讲[Decima Engine: Advances in Lighting and AA](http://advances.realtimerendering.com/s2017/DecimaSiggraph2017.pdf)中的做来，来计算NoH的最大值，代码为：
+4. 在计算Specular BRDF是时候，unreal参考了Decima Engine演讲[Decima Engine: Advances in Lighting and AA](http://advances.realtimerendering.com/s2017/DecimaSiggraph2017.pdf)中的做法，来计算NoH的最大值，代码为：
 ```c++
 // Engine/Shaders/Private/BRDF.ush
 // [ de Carpentier 2017, "Decima Engine: Advances in Lighting and AA" ]
