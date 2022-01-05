@@ -6,7 +6,7 @@
 
 {{ .Content }}
 
-<ul>
+<!-- <ul>
   {{ $pages := .Pages }}
   {{ if .IsHome }}{{ $pages = .Site.RegularPages }}{{ end }}
   {{ range (where $pages "Section" "!=" "") }}
@@ -15,6 +15,19 @@
     <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
   </li>
   {{ end }}
+</ul> -->
+
+<!-- {{ template "_internal/pagination.html" . }} -->
+<ul>
+  {{ $pages := .Paginator.Pages }}
+  {{ range (where $pages "Section" "!=" "") }}
+  <li>
+    <span class="date">{{ .Date.Format "2006/01/02" }}</span>
+    <a href="{{ .RelPermalink }}">{{ .Title | markdownify }}</a>
+  </li>
+  {{ end }}
 </ul>
+
+{{ partial "pagination.html" . }}
 
 {{ partial "footer.html" . }}

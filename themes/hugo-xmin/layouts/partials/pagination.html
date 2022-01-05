@@ -1,0 +1,31 @@
+{{- $pag := $.Paginator }}
+{{- if gt $pag.TotalPages 1 }}
+<div class="menu" >
+	{{- $ellipsed := false }}
+	{{- $shouldEllipse := false }}
+	{{- range $pag.Pagers }}
+	{{- $right := sub .TotalPages .PageNumber }}
+	{{- $showNumber := or (le .PageNumber 3) (eq $right 0) }}
+	{{- $showNumber := or $showNumber (and (gt .PageNumber (sub $pag.PageNumber 2)) (lt .PageNumber (add $pag.PageNumber
+	2))) }}
+	{{- if $showNumber }}
+	{{- $ellipsed = false }}
+	{{- $shouldEllipse = false }}
+	{{- else }}
+	{{- $shouldEllipse = not $ellipsed }}
+	{{- $ellipsed = true }}
+	{{- end }}
+	{{- if $showNumber }}
+	{{- if eq . $pag }}
+	<span data-total="{{ $pag.TotalPages }}">
+		{{- .PageNumber -}}
+	</span>
+	{{- else }}
+	<a href="{{ .URL }}">{{ .PageNumber }}</a>
+	{{- end }}
+	{{- else if $shouldEllipse }}
+	<span>&hellip;</span>
+	{{- end }}
+	{{- end }}
+</div>
+{{- end }}
