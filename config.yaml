@@ -2,7 +2,7 @@ baseurl: "/"
 languageCode: "en-us"
 title: "wingstone's blog"
 theme: "hugo-xmin"
-paginate: 12
+paginate: 16
 googleAnalytics: ""
 disqusShortname: ""
 ignoreFiles: ["\\.Rmd$", "\\.Rmarkdown$", "_cache$", "\\.knit\\.md$", "\\.utf8\\.md$"]
