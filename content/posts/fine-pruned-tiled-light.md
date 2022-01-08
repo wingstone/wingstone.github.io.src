@@ -20,6 +20,7 @@ Fptl是基于tiled base lighting而开发出来的更高效的光照计算方法
 Fptl已经应用在**Rise of the Tomb Raider**游戏中，Unity的hdrp中也使用了这一技术；在实际过程中，light list的生成会在渲染shadow map时，借助computer shader进行异步计算；
 
 light list的生成会分为两步：
+
 - 第一步生成初步的light list，此时light list的生成，由tile对应的screen space bounding volume与光源对应的aabb进行求交计算得来，计算结果存储在local storage中；
 - 第二步进行精细剔除，针对tile逐像素计算世界坐标，然后针对第一步得到的初步light list进行遍历，计算世界坐标是否在light shape范围内，若有像素在light shape内，则对应tile的fine light list应该包含此光源；
 
@@ -32,12 +33,14 @@ light list的生成会分为两步：
 由于Dx11的引入，基于cs的tiled lighting成为延迟渲染里主流的选择；TL会将屏幕划分`$n \times m$`的固定分辨率的tile，GPU会对每个tile生成一个index列表，这是一个与当前tile重叠的光源索引；后面的lightpass会根据这个index列表，来加载当前tile计算光照所需要的所有光源；
 
 TL的大致流程：
+
 1. 针对每一个tile，计算改tile深度的最大值与最小值，得到一个tile bound；
-2.  Each thread checks a disjoint subset of lights by bounding sphere against tile bounds.
+2. Each thread checks a disjoint subset of lights by bounding sphere against tile bounds.
 3. 将与该tile的相交的light的indices存储到local data storage（LDS）；
 4. 得到的light list则被所有的thread用来进行当前tile的光照运算；
 
 TL的优点：
+
 1. 对于TDL（tiled deferred lighting），针对每个像素使用**一个pass**循环当前tile的light list，即可完成所有的光照；相比于DL（deferred lighting），TDL只需要采样一次G-buffer，写入一次frame buffer即可；
 2. TL不仅可以用于DL，也可用于FL（forward lighting）；
 3. 对于TL来说，light list的生成非常适合使用异步计算，使得我们可以将这一过程与不相关的渲染计算同时进行；
@@ -53,15 +56,17 @@ TL的解决办法：使用精确的light shape来表示光源的范围，使用�
 这些情况使得传统的TL不能很好的解决light list生成问题，因此Fptl才被开发出来，大致流程如下：
 
 针对每个相机：
+
 1. 在CPU端计算与相机视锥体有交集的所有光源；
 2. 根据光源的类型对光源进行排序；
 3. 在GPU端，根据每个light的light shape来计算其紧致screen space AABB；通过求取相机与light的convex hull的insection volume来计算，并进一步限制了bound sphere的AABB；
 
 针对每个16x16tile：
+
 1. 针对每个tile计算depth buffer的min depth与max depth；
-2.  Each thread checks a disjoint subset of lights by bounding sphere against tile bounds.
-3.  将与该tile的相交的light的indices存储到local data storage（LDS）；可将此indices称之为coarse list；
-4.  在同一个kernel下，循环coarse list的所有light；
+2. Each thread checks a disjoint subset of lights by bounding sphere against tile bounds.
+3. 将与该tile的相交的light的indices存储到local data storage（LDS）；可将此indices称之为coarse list；
+4. 在同一个kernel下，循环coarse list的所有light；
 每一个thread计算4个像素，计算该像素是否在某一light shape内；然后将计算结果存储到一个bit位上，该bit系列对应coarse list，每个bit表示该light是否确实与tile相交；
 
 ## 实现细节
@@ -72,3 +77,12 @@ TL的解决办法：使用精确的light shape来表示光源的范围，使用�
 
 在针对相机的操作中，我们对光源按照光源形状进行了排序，这使得我们能够使用嵌套循环来处理所有光源计算，而避免使用判断语句（GPU使用Wrap thread来进行运作，若同一Wrap里面分支都跑到了，就会使得运作流程跑两个分支的时间）；官方里面Sphere与Capsule为一个类型，cone与widget为一个类型，box为一个类型；
 
+为了生成screen space的AABB，需要light的OBB（iented bounding box）作为输入，同时为了支持spot与widget光源，OBB需要一端的4个顶点支持非均匀缩放；为了计算AABB，需要计算视锥体与OBB的相交体，以及对应的点集；算法为使用视锥体来裁剪OBB的quad，并使用最终的顶点集来更新对应的AABB，即视锥体8个顶点中的任意一点位于OBB内，就必需要更新AABB；
+
+> 最后，需要计算light bounding sphere的AABB，然后再计算此AABB与之前计算得来的AABB的交集；
+
+整个过程需要大量的计算，不过只需要针对一个相机计算一次，可以选择在CPU执行，官方还是选择在GPU上使用异步CS来进行计算；
+
+## Open Source
+
+[GPU-Pro-7](https://github.com/wolfgangfengel/GPU-Pro-7)
