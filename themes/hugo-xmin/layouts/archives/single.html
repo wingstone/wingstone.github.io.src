@@ -12,7 +12,6 @@
           {{ range .Pages }}
             <li>
                 {{ .PublishDate.Format "2006-01-02" }}
-                ->
                 <a href="{{ .Permalink }}" class="permalink">{{ .Title }}</a>
             </li>
           {{ end }}

@@ -65,3 +65,10 @@ TL的解决办法：使用精确的light shape来表示光源的范围，使用�
 每一个thread计算4个像素，计算该像素是否在某一light shape内；然后将计算结果存储到一个bit位上，该bit系列对应coarse list，每个bit表示该light是否确实与tile相交；
 
 ## 实现细节
+
+现代GPU都是来靠切换jobs来隐藏lantency；每个CU（compute unit，include compute，vertex shading，pixel shading）所占用的jobs越少，则CPU隐藏lantency的能力越差；
+
+实时证明shadowmap的生成与light list的生成刚好是非常匹配的，shadow map主要消耗吞吐量，光栅化，只需要一个depth pass即可，几乎没有什么ALU的消耗，而Fptl则恰恰相反，Fptl是一个严重消耗ALU的算法，需要进行大量时间进行相交运算；两者进行异步运算，可以节省大量运算时间；
+
+在针对相机的操作中，我们对光源按照光源形状进行了排序，这使得我们能够使用嵌套循环来处理所有光源计算，而避免使用判断语句（GPU使用Wrap thread来进行运作，若同一Wrap里面分支都跑到了，就会使得运作流程跑两个分支的时间）；官方里面Sphere与Capsule为一个类型，cone与widget为一个类型，box为一个类型；
+
