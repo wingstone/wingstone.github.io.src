@@ -6,14 +6,13 @@
 
 {{ .Content }}
 
-<ul>
-  {{ $pages := .Paginator.Pages }}
-  {{ range (where $pages "Section" "!=" "") }}
-  <li>
-    {{ .Render "summary" }}
-  </li>
-  {{ end }}
-</ul>
+<hr/>
+<br/>
+
+{{ $pages := .Paginator.Pages }}
+{{ range (where $pages "Section" "!=" "") }}
+  {{ .Render "summary" }}
+{{ end }}
 
 {{ partial "pagination.html" . }}
 
