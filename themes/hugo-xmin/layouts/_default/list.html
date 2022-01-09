@@ -7,7 +7,7 @@
 {{ .Content }}
 
 <hr/>
-<br/>
+<div style="height: 0.5em;"></div>
 
 {{ $pages := .Paginator.Pages }}
 {{ range (where $pages "Section" "!=" "") }}
