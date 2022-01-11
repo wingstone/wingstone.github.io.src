@@ -90,3 +90,12 @@ a:not([href]):hover {
 	color: inherit;
 	text-decoration: none;
 }
+
+/* footnote */
+a.footnote-ref::before {
+  content: '[';
+}
+
+a.footnote-ref::after {
+  content: ']';
+}
