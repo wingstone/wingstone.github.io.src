@@ -85,7 +85,7 @@ $$
 我们使用前面的Shading Model来处理IBL，正常情况下要使用重要性采样来进行；积分公式为：
 
 $$
-\int_H {L_i(L)f(l,v)cos\theta_l} \,{\rm d}l= \frac{1}{N}\sum_{k=1}^N \frac{L_i(l_k)f(l,v)cos\theta_l}{p(l_k, v)} \quad
+\int_H {L_i(L)f(l,v)cos\theta_l} {\rm d}l= \frac{1}{N}\sum_{k=1}^N \frac{L_i(l_k)f(l,v)cos\theta_l}{p(l_k, v)} \quad
 $$
 
 代码为：
@@ -180,7 +180,7 @@ float3 PrefilterEnvMap( float Roughness, float3 R )
 第二项积分，可以认为是均匀白光下，对Specular brdf的积分，即`$L_i(l_k)=1$`；对于菲涅尔项，使用Schlick的形式：`$F(v,h)=F_0+(1-F_0)(1-v\cdot h)^5$`，我们可以发现，积分中`$F_0$`可以提取出来，即
 
 $$
-\int_H {f(l,v)cos\theta_l} \,{\rm d}l= F_0\int_H {\frac{f(l,v)}{F(v,h)}(1-(1-v\cdot h)^5)cos\theta_l} \,{\rm d}l + \int_H {\frac{f(l,v)}{F(v,h)}(1-v\cdot h)^5cos\theta_l} \,{\rm d}l
+\int_H {f(l,v)cos\theta_l} {\rm d}l= F_0\int_H {\frac{f(l,v)}{F(v,h)}(1-(1-v\cdot h)^5)cos\theta_l} {\rm d}l + \int_H {\frac{f(l,v)}{F(v,h)}(1-v\cdot h)^5cos\theta_l} {\rm d}l
 $$
 
 最后的积分公式只需要Roughness与`$cos\theta_v$`作为输入，`$F_0$`的scale与bias作为输出。由于输入为0到1的范围，可以很容易的使用2dlut来存储积分结果。
@@ -348,7 +348,7 @@ $$
 我们可以光源上计算离反射光线最小角度的点，通过计算离反射光线最近点的方式：
 
 $$
-centerToRay = L-(L\cdot r)r \\
+centerToRay = L-(L\cdot r)r \\\\
 closestPoint = L + centerToRay*saturate(\frac{sourceRadius}{|centerToRay|})
 $$
 
@@ -357,10 +357,10 @@ $$
 通过移动光源位置到光源表面，我们实际上会拓宽specular分布至光源对应的cone angle；使用归一化的Phong分布来表示的话，点光源与球光源的分布分别为：
 
 $$
-I_point = \frac{p+2}{2\pi} cos^p\phi_r \\
+I_point = \frac{p+2}{2\pi} cos^p\phi_r \\\\
 I_{sphere}
 \begin{cases}
-\frac{p+2}{2\pi} &if\phi_r < \phi_a \\
+\frac{p+2}{2\pi} &if\phi_r < \phi_a \\\\
 \frac{p+2}{2\pi} cos^p(\phi_r-\phi_a) &if\phi_r > \phi_a
 \end{cases}
 $$
@@ -378,7 +378,7 @@ $$
 首先减少光源半径为0，如此便可认为光源为linear light，linear light上理反射最小angle的近似点为：
 
 $$
-t = \frac{(r\cdot L_0)(r\cdot L_d) - (L_0\cdot L_d)}{|L_d|^2-(r\cdot L_d)^2} \\
+t = \frac{(r\cdot L_0)(r\cdot L_d) - (L_0\cdot L_d)}{|L_d|^2-(r\cdot L_d)^2} \\\\
 l = ||L_0+saturate(t)L_d||
 $$
 

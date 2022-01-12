@@ -1,5 +1,6 @@
 ---
 title: 'Color Space'
+author: wingstone
 date: 2021-06-26 23:14:15
 categories:
 - Light&Color

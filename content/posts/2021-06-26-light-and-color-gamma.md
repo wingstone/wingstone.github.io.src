@@ -1,5 +1,6 @@
 ---
 title: 'gamma'
+author: wingstone
 date: 2021-06-26 21:11:24
 categories:
 - light&color
