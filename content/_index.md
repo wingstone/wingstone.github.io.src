@@ -4,9 +4,9 @@ title: Home
 
 [<img src="https://wingstone.github.io/wingstone.github.io.images/img/avatar.png" style="max-width:15%;min-width:40px;float:right;" alt="Github repo" />](https://github.com/wingstone)
 
-# wingstone's blog
+## wingstone's blog
 
-## Keep learning, Keep thinking, Keep running
+### Keep learning, Keep thinking, Keep running
 
 在我研究计算机图形学的时候，会经常在间隔不同的时间下，去研究同一片文章，甚至是同一片文章的同一块内容；究其原因，是因为自己没有将知识点做好归纳总结，并输出成文字记录；
 
