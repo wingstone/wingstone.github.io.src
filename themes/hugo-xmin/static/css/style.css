@@ -180,7 +180,7 @@ a.footnote-ref::after {
     bottom: 60px;
     right: 60px;
     z-index: 99;
-    background: #1b1b1b;
+    background: #1b1b1b00;
     width: 18px;
     height: 18px;
     padding: 12px;
