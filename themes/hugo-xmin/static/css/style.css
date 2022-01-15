@@ -1,109 +1,193 @@
 body {
-  max-width: 800px;
-  margin: auto;
-  padding: 1em;
-  line-height: 1.5em;
-	font-size: 1rem;
-	font-weight: 400;
-	color: #ddd;
-	background-color: #1b1b1b;
-	-webkit-text-size-adjust: 100%;
-	-webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    max-width: 800px;
+    margin: auto;
+    padding: 1em;
+    line-height: 1.5em;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #ddd;
+    background-color: #1b1b1b;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
 .summary {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 85%;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 85%;
 }
+
 .element {
-  background: #292929;
-  padding: 5px;
-  margin: 10px 0;
-  border-radius: 5px;
+    background: #292929;
+    padding: 5px;
+    margin: 10px 0;
+    border-radius: 5px;
 }
+
 
 /* header and footer areas */
-.menu { padding: 0; }
-.menu li { display: inline-block; }
+
+.menu {
+    padding: 0;
+}
+
+.menu li {
+    display: inline-block;
+}
+
 .menu a {
-  text-decoration: none;
-  background: #4b4a4a;
-  padding: 5px;
-  border-radius: 5px;
+    text-decoration: none;
+    background: #4b4a4a;
+    padding: 5px;
+    border-radius: 5px;
 }
+
 .article-meta {
-  text-decoration: none;
-  background: #2e2e2e;
-  padding: 5px;
-  border-radius: 5px;
+    text-decoration: none;
+    background: #2e2e2e;
+    padding: 5px;
+    border-radius: 5px;
 }
-.menu, .article-meta, footer { text-align: center; }
-.title { font-size: 1.1em; }
-footer a { text-decoration: none; }
+
+.menu,
+.article-meta,
+footer {
+    text-align: center;
+}
+
+.title {
+    font-size: 1.1em;
+}
+
+footer a {
+    text-decoration: none;
+}
+
 hr {
-  border-style: dashed;
-  color: #ddd;
+    border-style: dashed;
+    color: #ddd;
 }
+
 
 /* code */
+
 pre {
-  border: 1px solid #ddd;
-  padding: 1em;
-  overflow-x: auto;
+    border: 1px solid #ddd;
+    padding: 1em;
+    overflow-x: auto;
 }
-code { background: #f9f9f9; }
-pre code { background: none; }
+
+code {
+    background: #f9f9f9;
+}
+
+pre code {
+    background: none;
+}
+
 
 /* misc elements */
-img, iframe, video { max-width: 100%; }
-main { hyphens: auto; }
-blockquote {
-  background: #363535;
-  border-left: 5px solid #5c5c5c;
-  padding: 3px 1em 3px;
+
+img,
+iframe,
+video {
+    max-width: 100%;
 }
 
-/* table */
-table {
-  margin: auto;
-  border-top: 1px solid #666;
-  border-bottom: 1px solid #666;
+main {
+    hyphens: auto;
 }
-table thead th { border-bottom: 1px solid #ddd; }
-th, td { padding: 5px; }
-thead, tfoot, tr:nth-child(even) { background: #eee; }
+
+blockquote {
+    background: #363535;
+    border-left: 5px solid #5c5c5c;
+    padding: 3px 1em 3px;
+}
+
+
+/* table */
+
+table {
+    margin: auto;
+    border-top: 1px solid #666;
+    border-bottom: 1px solid #666;
+}
+
+table thead th {
+    border-bottom: 1px solid #ddd;
+}
+
+th,
+td {
+    padding: 5px;
+}
+
+thead,
+tfoot,
+tr:nth-child(even) {
+    background: #eee;
+}
 
 
 /* link */
+
 a {
-	color: #f8ae00;
-	text-decoration: none;
+    color: #f8ae00;
+    text-decoration: none;
 }
 
 a:hover {
-	color: #da6619;
-	text-decoration: underline;
+    color: #da6619;
+    text-decoration: underline;
 }
 
 a:not([href]),
 a:not([href]):hover {
-	color: inherit;
-	text-decoration: none;
+    color: inherit;
+    text-decoration: none;
 }
 
+
 /* footnote */
+
 a.footnote-ref::before {
-  content: '[';
+    content: '[';
 }
 
 a.footnote-ref::after {
-  content: ']';
+    content: ']';
 }
 
 .footnote-backref {
-  visibility: hidden;
+    visibility: hidden;
 }
+
 .footnote-backref::before {
-  content: '^';
-  visibility: visible;
+    content: '^';
+    visibility: visible;
+}
+
+
+/* top link */
+
+.top-link {
+    font-size: 12px;
+    color: #6c6c6c;
+}
+
+.top-link {
+    visibility: hidden;
+    position: fixed;
+    bottom: 60px;
+    right: 60px;
+    z-index: 99;
+    background: #1b1b1b;
+    width: 18px;
+    height: 18px;
+    padding: 12px;
+    border-radius: 64px;
+    transition: visibility 0.2s, opacity 0.2s linear;
+}
+
+.top-link:hover {
+    color: #daad19;
 }
