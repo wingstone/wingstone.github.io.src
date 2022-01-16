@@ -8,7 +8,7 @@ feature:
 isTop: false
 ---
 
-C++中的一些细节问题
+C++中的static关键字的一些使用细节问题
 <!--more-->
 
 ## C语言中的static关键字
