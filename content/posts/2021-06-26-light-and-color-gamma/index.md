@@ -16,7 +16,7 @@ tags:
 
 gamma是什么，gamma faq[^1]中有解释：在传统的crt显示器中，屏幕显示的luminance与电压并不是成正比的关系，而是成一个幂次方的关系，即`$l = v^\gamma$`，其中的幂就是我们通说所说的gamma；
 
-![gamma变换](/post-images/gamma/gamma.png)
+![gamma变换](gamma.png)
 <center>显示器的gamma变换</center>
 
 ## 二、gamma correction
@@ -25,7 +25,7 @@ gamma是什么，gamma faq[^1]中有解释：在传统的crt显示器中，屏�
 
 由于显示器所显示的luminance为正常展示场景亮度的gamma次方（我们称之为gamma变换），为了使显示器亮度为正常的展示场景亮度，抵消显示器gamma变换的影响，必须在显示器前对展示场景亮度做 **gamma变换的逆变换** ，此逆变换我们称之为 **gamma correction** ；
 
-![gamma correction](/post-images/gamma/gamma-correction.png)
+![gamma correction](gamma-correction.png)
 <center>显示器的gamma correction</center>
 
 实际上场景所在的空间，我们常称之为线性空间，即 **linear space** ，对应着曲线y=x；经过 **gamma correction过后的空间** ，我们称之为gamma空间，即 **gamma space** ，对应着曲线y=x的上半段；
@@ -44,12 +44,12 @@ gamma correction有时也称 **encode gamma** ，从gamma空间转换到线性�
 
 这样导致的结果就是：假如没有gamma correction，显示器显示一段均匀变化的亮度，人眼感知到的亮度刚好也是均匀的；因为显示器先做了gamma变换，人眼感知又做了gamma逆变换，导致人眼感知到的是均匀的；如下图所示：
 
-![未做gamma correction的0-1渐变图](/post-images/gamma/gradient-linear.png)
+![未做gamma correction的0-1渐变图](gradient-linear.png)
 <center>未做gamma correction的0-1渐变图</center>
 
 如果我们做了gamma correction，这个时候虽然是显示器最终显示的是均匀变化的亮度，但是人眼的感受却是不均匀的；因为先做了gamma correction（gamma逆变换），然后显示器做了gamma变换，人眼感知又做了gamma逆变换，导致人眼感知到的是gamma逆变换后的；如下图所示：
 
-![gamma correction的0-1渐变图](/post-images/gamma/gradient-gamma.png)
+![gamma correction的0-1渐变图](gradient-gamma.png)
 <center>做了gamma correction的0-1渐变图</center>
 
 做了gamma correction之后的渐变图就是人眼真正应该感知到的渐变图：暗部人眼感知到的亮度大于实际亮度，且相差比较大；亮部人眼感知到的亮度与实际亮度基本持平，且相差较小；
@@ -76,29 +76,29 @@ gamma correction有时也称 **encode gamma** ，从gamma空间转换到线性�
 
 下图为rtr中在现实过程中gamma的处理[^3]，与我们之前所理解的一致；
 
-![gamma process in display](/post-images/gamma/gamma-process.png)
+![gamma process in display](gamma-process.png)
 <center>gamma process in display</center>
 
 ### gamma使用不当会引起的问题
 
 事实上，早期人们还没有意识到gamma的问题，以至于很多图形上的操作都是在gamma空间下进行的，以至于出现了很多画面上的问题，包括light fall-off、linear intensity response、linear and gamma blending等[^4]；分别如下图所示：
 
-![light fall-off](/post-images/gamma/gamma-compare.png)
+![light fall-off](gamma-compare.png)
 <center>light fall-off</center>
 
 light fall-off影响的为光照沿平面朝向的衰减，其实是就是计算该点的irridience，在diffuse上会有明显的感受；可以看到gamma space下亮度分布更均匀，linear space下亮度分布更接近[人眼感知](#关于gamma的巧合)；
 
-![linear intensity response](/post-images/gamma/gamma-compare1.png)
+![linear intensity response](gamma-compare1.png)
 <center>linear intensity response</center>
 
 gamma空间下，不同光强产生的影响会更加反直觉，会非常容易产生过曝的问题，以至于在项目中美术打光很难控制光照强度；
 
-![linear and gamma blending](/post-images/gamma/gamma-blend.png)
+![linear and gamma blending](gamma-blend.png)
 <center>linear and gamma blending</center>
 
 gamma空间下的blend则会引起色相偏移问题（插值、叠加或其他blend方式），这在工程中对美术来说是很不友好的，特别是游戏中的特效，受此影响最为过大；在rtr4中则还提到了叠加引起的亮度感知错误问题，在5.6章节，有兴趣的可以看一下；
 
-![ropping](/post-images/gamma/gamma-ropping.png)
+![ropping](gamma-ropping.png)
 <center>ropping</center>
 
 ropping现象则是因为没有经过gamma correction引起的直线弯曲效应；不过需要在使用msaa或者ssaa的情况下才能看到，上图就是开8xaa情况下出现的问题；

@@ -27,11 +27,12 @@ isTop: false
 ### Tessellation Stages（细分阶段）
 
 该阶段实际上有三个小阶段来完成图元的细分；通过硬件实现细分，GPU Graphic Pipeline能将低细节的模型转换为高细节模型进行渲染；
+
 #### Hull-Shader Stage（壳着色阶段）
 
 **一个可编程shader阶段**，用来生成一个patch（和patch constants），每个patch对应一个输入的patch（quad, triangle, or line）；有点像一个基本的图元类型；
 
-#### Tessellator Stage 
+#### Tessellator Stage
 
 一个固定处理阶段，用来生成简单格式的域，一个域代表一个geometry patch并用来生成更小物体的集合（triangles, points, or lines），通过连接domain sample来实现；
 
@@ -42,6 +43,7 @@ isTop: false
 ### Geometry Shader Stage（几何着色阶段）
 
 **一个可编程shader阶段**，该阶段同样以顶点作为输入，以顶点作为输出；但与VS有很大不同；
+
 1. 输入顶点数不一定为一，输入顶点数刚好可以可组成一完整图元（two vertices for lines, three vertices for triangles, or single vertex for point）；并且可以携带邻接的图元顶点数据（an additional two vertices for a line, an additional three for a triangle）；
 2. 输出顶点数不一定为一，输出的顶点数目可以形成特定的拓扑结构即可，输出的拓扑结构可选（GS stage output topologies available are: tristrip, linestrip, and pointlist）；
 
