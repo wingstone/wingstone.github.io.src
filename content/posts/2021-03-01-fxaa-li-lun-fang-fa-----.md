@@ -45,7 +45,7 @@ float range = rangeMax -rangeMin;
 if(range < max(FXAA_EDGE_THRESHOLD_MIN, rangeMax * XAA_EDGE_THRESHOLD))           {return FxaaFilterReturn(rgbM); }
 ```
 
-3. **边缘的横纵向检测，用于后续抗拒齿处理；**
+- **边缘的横纵向检测，用于后续抗拒齿处理；**
 边缘进行光栅化之后，在比较小的维度上，只有横向边缘与纵向边缘之分；检测出来横向与纵向，可以便于后续沿边缘进行延伸；
 
 ```c++
@@ -54,7 +54,7 @@ float edgeHorz = abs((0.25 * lumaNW) + (-0.5 * lumaW) + (0.25 * lumaSW)) +abs((0
 bool horzSpan = edgeHorz >= edgeVert;   //判断当前像素位于横向边缘还是纵向边缘
 ```
 
-4.**判断真正的边缘边界位置，并将当前点定位到真正的边缘边界处；**
+- **判断真正的边缘边界位置，并将当前点定位到真正的边缘边界处；**
 检测出横向还是纵向后，需要定位边缘边界是在上横向还是下横向，左横向还是右横向；
 当前点是在像素中心，定位出边缘边界（位于两个像素的交接处）后，即可将当前点移动到边缘边界；
 
@@ -89,7 +89,7 @@ if(isHorizontal){
 }
 ```
 
-5. 定位到边界处，需要沿边缘方向（横向或纵向）进行搜索，来计算当前边缘的长度；
+- 定位到边界处，需要沿边缘方向（横向或纵向）进行搜索，来计算当前边缘的长度；
 之所以计算边缘的长度，是因为锯齿一般都出现在边缘端点处；离端点越远，越不容易产生锯齿；我们需要计算当前边缘边界距边缘端点的距离，用来计算锯齿的强弱程度；
 
 ```c++
@@ -143,7 +143,7 @@ if(!reachedBoth){
 }
 ```
 
-6. 偏移（此偏移量作用于最初uv，用于最终采样）估算
+- 偏移（此偏移量作用于最初uv，用于最终采样）估算
 前面说到越靠近边缘终点，锯齿越严重，那么最终像素输出采样点的偏移量越大；与此相反，越靠近边缘中点，输出采样点的偏移量越小；算法如下：
 
 ```c++
@@ -161,7 +161,7 @@ bool correctVariation = ((isDirection1 ? lumaEnd1 : lumaEnd2) < 0.0) != isLumaCe
 float finalOffset = correctVariation ? pixelOffset : 0.0;
 ```
 
-7. 子像素抗拒齿处理
+- 子像素抗拒齿处理
 使用额外的步骤即可处理子像素抗拒齿（即细线引起的锯齿，或点引起的锯齿，我也不知道为啥叫做子像素锯齿==）；
 基本思路是计算中心点与周围点的差值，然后计算此差值与局部差值的比值来计算子像素抗拒齿的偏移量；最终选择较大偏移量作为最终采样值；
 
@@ -175,7 +175,7 @@ float subPixelOffsetFinal = subPixelOffset2 * subPixelOffset2 * SUBPIXEL_QUALITY
 finalOffset = max(finalOffset,subPixelOffsetFinal);
 ```
 
-8. 使用最终偏移量进行采样;
+- 使用最终偏移量进行采样;
 
 ```c++
 vec2 finalUv = In.uv;
@@ -189,4 +189,3 @@ vec3 finalColor = texture(screenTexture,finalUv).rgb;
 fragColor = finalColor;
 ```
 
-注意点：FXAA运行在sRGB空间；直接作用于linear、hdr数据，会出现闪烁问题；
