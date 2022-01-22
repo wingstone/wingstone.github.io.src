@@ -13,6 +13,8 @@ coverMeta: out
 Unity计算平滑法线的简单功能实现
 <!--more-->
 
+## Version1
+
 ```c++
 using UnityEngine;
 using UnityEditor;
@@ -138,6 +140,107 @@ public class MeshNormalSmoothWindow : EditorWindow
             AssetDatabase.Refresh();
         }
         EditorGUILayout.EndVertical();
+    }
+}
+```
+
+## Version2
+
+```c++
+using UnityEngine;
+using UnityEditor;
+using System.Collections.Generic;
+
+public class MeshNormalSmoothWindow : EditorWindow
+{
+    [MenuItem("Window/MeshNormalSmoothWindow")]
+    static void Init()
+    {
+        MeshNormalSmoothWindow window = (MeshNormalSmoothWindow)EditorWindow.GetWindow(typeof(MeshNormalSmoothWindow));
+        window.Show();
+    }
+
+    Mesh mesh;
+
+    void OnGUI()
+    {
+        EditorGUILayout.BeginVertical();
+        mesh = EditorGUILayout.ObjectField("mesh", mesh, typeof(Mesh), true) as Mesh;
+        if (GUILayout.Button("convert"))
+        {
+            Vector3[] vertices = mesh.vertices;
+            int[] triangles = mesh.triangles;
+
+            int polygonNum = mesh.triangles.Length / 3;
+            Vector3[] polyNormals = new Vector3[polygonNum];
+            for (int i = 0; i < polygonNum; i++)
+            {
+                int vid0 = triangles[i * 3];
+                int vid1 = triangles[i * 3 + 1];
+                int vid2 = triangles[i * 3 + 2];
+
+                polyNormals[i] = Vector3.Cross(vertices[vid1] - vertices[vid0], vertices[vid2] - vertices[vid0]).normalized;
+            }
+
+            int vertexNum = mesh.vertices.Length;
+            Vector3[] normals = new Vector3[vertexNum];
+            int[] normalsNum = new int[vertexNum];
+            List<Vector3> hashvertexs = new List<Vector3>();
+            List<Vector3> hashnormals = new List<Vector3>();
+            List<int> hasnormalsNums = new List<int>();
+            for (int i = 0; i < vertexNum; i++)
+            {
+                normals[i] = Vector3.zero;
+            }
+            for (int i = 0; i < polygonNum; i++)
+            {
+
+                int vid0 = triangles[i * 3];
+                int vid1 = triangles[i * 3 + 1];
+                int vid2 = triangles[i * 3 + 2];
+
+                for (int j = 0; j < vertexNum; j++)
+                {
+                    if(vertices[j] == vertices[vid0])
+                    {
+                        normals[j] += polyNormals[i];
+                        normalsNum[j]++;
+                    }
+                    if(vertices[j] == vertices[vid1])
+                    {
+                        normals[j] += polyNormals[i];
+                        normalsNum[j]++;
+                    }
+                    if(vertices[j] == vertices[vid2])
+                    {
+                        normals[j] += polyNormals[i];
+                        normalsNum[j]++;
+                    }
+                }
+
+            }
+            for (int i = 0; i < vertexNum; i++)
+            {
+                normals[i] /= normalsNum[i];
+                normals[i].Normalize();
+            }
+
+            Mesh newmesh = new Mesh();
+            newmesh.vertices = mesh.vertices;
+            newmesh.triangles = mesh.triangles;
+            newmesh.normals = normals;
+            newmesh.uv = mesh.uv;
+            newmesh.uv2 = mesh.uv2;
+            newmesh.boneWeights = mesh.boneWeights;
+            newmesh.bindposes = mesh.bindposes;
+
+            AssetDatabase.CreateAsset(newmesh, "Assets/test.asset");
+            AssetDatabase.Refresh();
+
+
+        }
+        EditorGUILayout.EndVertical();
+
     }
 }
 ```
