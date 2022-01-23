@@ -1,7 +1,7 @@
 ---
 title: "Terrain To Mesh"
 author: wingstone
-date: 2022-01-022
+date: 2022-01-22
 categories:
 - Unity
 tags:
@@ -10,10 +10,10 @@ metaAlignment: center
 coverMeta: out
 ---
 
-Unity转换Terrain为mesh的简单脚本实现
+Unity转换Terrain为mesh的简单功能实现；
 <!--more-->
 
-```c++
+```c#
 using UnityEngine;
 using UnityEditor;
 
