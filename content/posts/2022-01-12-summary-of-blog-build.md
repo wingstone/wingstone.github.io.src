@@ -155,3 +155,37 @@ css代码为：
     color: #daad19;
 }
 ```
+
+### CSS Hover下划线的实现
+
+利用CSS的Transition即可实现下划线的动画效果；代码如下：
+
+```css
+.menu-item {
+    position: relative;
+    text-decoration: none;
+    font-size: 18px;
+    padding: 5px;
+}
+
+.menu-item:hover {
+    text-decoration: none;
+}
+
+.menu-item:before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    height: 2px;
+    bottom: -2px;
+    width: 0%;
+    left: 50%;
+    background: #c05b4d;
+    transition: all 0.2s;
+}
+.menu-item:hover::before {
+    left: 0;
+    right: 0;
+    width: 100%;
+}
+```

@@ -1,11 +1,11 @@
 ---
 title: 'Pipeline——GPU Graphic Pipeline（图形管线）'
 date: 2020-09-13 09:14:06
-tags: [pipeline,图形学]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- 图形学
+tags: 
+- GPU
+- pipeline
 ---
 ## 管线介绍
 

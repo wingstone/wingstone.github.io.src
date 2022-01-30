@@ -1,11 +1,12 @@
 ---
 title: 'Unity Useful Plugins And Projects'
 date: 2020-03-29 14:33:26
-tags: [unity]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- Unity
+tags: 
+- Unity
+- 资源汇总
+- 插件
 ---
 
 这是一个插件集合的列表，主要用来存储我在学习unity过程中使用到的非常好用的插件，或者一些不错的工程；本着通用和好用的要求，这里的插件都是一些基本功能的整合；

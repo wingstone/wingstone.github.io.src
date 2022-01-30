@@ -1,11 +1,10 @@
 ---
 title: 'C++ Static Usage'
 date: 2020-09-07 14:37:51
-tags: [C++]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- C++
+tags: 
+- C++
 ---
 
 C++中的static关键字的一些使用细节问题

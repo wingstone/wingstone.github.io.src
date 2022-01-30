@@ -15,7 +15,6 @@ tags:
 
 1. [Physically Based Rendering:From Theory To Implementation](https://www.pbrt.org/index.html)：大名鼎鼎的《基于物理的渲染：从理论到实现》，离线学习必看，包含了各种光线追踪中用到的技术！官网还提供了第三版书籍的[网页版](http://www.pbr-book.org/)供免费看；
 
-
 ## 实时渲染
 
 1. [Real-Time Rendering](http://www.realtimerendering.com/index.html)：实时渲染技术的圣经，涵盖了实时渲染技术的各个方面，建议购买实体书查看；最重要的是记得去官网逛逛，官网包含了大量实时渲染的资料；随着实时ray tracing的发展，官网甚至涵盖了大量ray tracing相关的资料；
