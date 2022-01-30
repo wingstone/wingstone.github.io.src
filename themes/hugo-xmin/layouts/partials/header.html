@@ -16,7 +16,7 @@
     <nav>
     <ul class="menu">
       {{ range .Site.Menus.main }}
-      <li><a href="{{ .URL | relURL }}">{{ .Name }}</a></li>
+      <li><a href="{{ .URL | relURL }}" class="menu-item">{{ .Name }}</a></li>
       {{ end }}
     </ul>
     <hr/>
