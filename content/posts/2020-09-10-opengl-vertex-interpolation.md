@@ -1,11 +1,14 @@
 ---
 title: 'Opengl Vertex Interpolation'
 date: 2020-09-10 14:39:18
-tags: [图形学,OpenGL]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- 图形学
+tags:
+- Unity
+- GPU
+- 心得
+metaAlignment: center
+coverMeta: out
 ---
 
 OpenGL中关于插值问题

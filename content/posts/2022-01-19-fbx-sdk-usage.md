@@ -6,7 +6,6 @@ categories:
 - idea
 metaAlignment: center
 coverMeta: out
-draft: false
 ---
 
 记录使用fbx sdk过程中所踩得一些坑；

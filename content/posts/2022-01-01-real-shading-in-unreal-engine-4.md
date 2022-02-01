@@ -260,7 +260,7 @@ Unreal发表此文章时只提供了subsurface与skin这两种shading model，�
 
 Unreal转换pbr的经历验证了，移除speculer，使用金属粗糙度模型并不会影响美术人员的表达，只需要美术人员重新习惯即可。
 
-金属度是否应该是是二值的？是的！金属度就应该是非黑即白的。对于金属度位于01之间的数值应该是使用material layer来表达！即金属覆盖在非金属之上或非金属覆盖在金属之上；
+金属度是否应该是是二值的？对于使用material layer制作的材质球，金属度就应该是非黑即白的。对于金属度位于01之间的数值应该是使用material layer来表达！即金属覆盖在非金属之上或非金属覆盖在金属之上；而那些不用来做material layer的材质球，则是可以使用非二值的材质球，实际上，大多数艺术家在制作贴图时，很少使用二值的金属度表示；
 
 为了保证fortnite的非pbr效果，unreal还是扩充了specular参数，但是并不意味着无法用之前的pbr model来表达非pbr效果，毕竟Disney的动画片已经做出了验证。后续unreal也将会移除specular参数。
 

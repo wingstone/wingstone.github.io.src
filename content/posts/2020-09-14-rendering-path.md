@@ -1,14 +1,17 @@
 ---
-title: 'Pipeline——Render Pipeline/Path（渲染管线/路径）'
+title: 'Pipeline——Rendering Path（渲染路径）'
 date: 2020-09-14 14:51:39
-tags: [图形学,pipeline]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- Unity
+tags:
+- Unity
+- 资源汇总
+- 程序化生成
+metaAlignment: center
+coverMeta: out
 ---
 
-Render Path称之为渲染路径更为合适，实际上指渲染一帧所要走的流程，这个流程主要用来处理光照，以及后处理等；常见的有Forward/Deferred Rendering；以及其改版Forward+、Tiled Based Deferred Rendering、Clustered Shading；以及更灵活的Frame Graph（寒霜引擎）、SRP（Unity引擎）；
+Rendering Path主要用来指光照计算上的处理方式等；常见的有Forward/Deferred Rendering；以及其改版Forward+、Tiled Based Deferred Rendering、Clustered Shading；
 <!--more-->
 
 注意：在render之前，一般还会有一个Application stage，用以在CPU上运行一些必要的前置任务：如碰撞检测、全局加速算法（视锥剔除、遮挡剔除）、物理模拟、动画效果等等；处理完这些后，才能进行高效合理的渲染；
@@ -76,32 +79,3 @@ TBDR和Forward+使用平面上的tile进行light culling，每一个tile的深�
 clustered shading就此产生，其给light list的划分增加了一个维度，即depth，它根据view frustum的zmin，zmax把场景进一步根据depth划分成若干个slice（基于指数的划分，通常16个），然后在每个slice上对场景中的所有灯光进行light culling；
 
 在实际shading的时候，每个像素根据自己的depth和screen position，找到对应的depth slice，从3D Texture里拿到offset和num lights，再执行一个num lights次循环；
-
-## Unity Scriptable Render Pipeline（SRP可编程渲染管线）
-
-Unity SRP实际上是对底层渲染API进行了封装，并且结合unity内部的渲染模块，提供了一个相对高级的可编程化的渲染管线；用户可以使用SRP编写适合自己产品的Render Pipeline；不过要想自定义SRP，必须要对已有的管线有深入了解，才能编写出高效的管线；
-
-在Unity SRP出现之前，Unity提供的是不可更改的standard built-in pipeline；Unity SRP出现后，Unity还提供了两个已经相对标准且开源的基于SRP的管线，**URP与HDRP**；URP主要侧重于通用平台下的渲染，支持多平台；HDRP主要侧重高端平台下的渲染（大量使用了Computer Shader），普通平台支持不了；
-
-## Frame Graph
-
-随着时代的发展，内置固化的渲染管线架构已经越来越不能满足行业发展的需求，具体表现在以下几个方面：
-
-1. 多样化的游戏画面表现需求：有的写实，有的卡通，有的更加风格化，这就要求引擎的渲染管线能具有相应的可调整的能力；
-2. 不同平台的软硬件能力差异：比如 PC、主机硬件能力更强，需要有更高端的画面表现，试图通过一种渲染流程来充分发挥每个平台的优势以及消除劣势，是一件非常困难的事情；
-3. Rendering Path 的不断进化：即前面介绍的各种render path；
-4. 新的渲染技术：近年来的 VR\AR\XR 渲染技术对渲染管线提出了特定的需求，一套管线已经很难做到完全兼容这些渲染机制。在 2018 年微软发布了革命性的 DirectX RayTracing，这更是完全不同Rendering\Computing 机制。
-
-通过上述几点，说明传统的固定功能的渲染管线架构已经不再适合未来游戏发展的需求，如果重新设计引擎的渲染管线，必须要考虑到渲染管线的可扩展性、可配置性、甚至是 Data-Driven 的。
-
-**Frostbite：Frame Graph（FG）**就此产生，FG 由** RenderPass** 以及其依赖的 **Resource **组成。RenderPass 定义了一个完整的渲染操作，Resource 包括了 RenderPass 使用的 PSO、Texture、RenderTarget、ConstantBuffer、Shader 等资源。每个 RenderPass 都有 Input 和 Output 资源，这样 RenderPass 和 Resource 就形成了有向非循环图（DAG）结构，因为描述的是引擎在一帧内的渲染流程，所以称之为 Frame Graph。
-
-更详细的Frame Graph接受看[这里](https://www.cnblogs.com/username/p/8497150.html)；
-
-在 RG 中，每个 RenderPass（RP） 包含三个重要阶段：
-
-1. Setup 阶段，主要用于定义输入和输出所使用的资源，比如 RenderTarget、Buffer 等。
-2. Compile 阶段，根据 Setup 所定义的资源，来决定真正需要执行的 RP 执行路径图，并且裁剪掉不需要执行的 RP 依赖资源。
-3. Execute 阶段，是真正执行 RP 渲染逻辑的阶段。在这个阶段可以直接调用渲染 API 将 Render Command 和 GPU 资源提交到渲染设备中，完成真正的渲染。
-
-Setup 一般只需要执行一次，Execute 每帧都需要执行，Compile 可根据情况执行多次，比如某个 RP 根据配置动态变化，这时需要重新 Compile，以获得变化后的 RP 执行路径图。

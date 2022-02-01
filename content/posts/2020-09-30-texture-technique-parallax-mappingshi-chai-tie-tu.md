@@ -1,11 +1,13 @@
 ---
 title: '贴图技术——Parallax Mapping（视差贴图）'
 date: 2020-09-30 13:10:15
-tags: [图形学]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- Rendering
+tags:
+- Rendering
+- Texture
+metaAlignment: center
+coverMeta: out
 ---
 视差贴图属于位移贴图(Displacement Mapping)技术的一种，它对根据储存在纹理中的几何信息对顶点进行位移或偏移。一般使用位移贴图之前，需要对模型进行细分（细分着色器），然后进行顶点位移；
 <!--more-->
@@ -24,6 +26,7 @@ isTop: false
 //_ParallaxHeight为一控制参数
 uv -= tex2D(_HightMap, uv)*TV.xy*_ParallaxHeight;     //V向量为切空间下的向量
 ```
+
 在高度图变化比较剧烈的地方，采用这种方法会有很对问题；因此又发展出了Steep Parallax Mapping（陡峭视差贴图）；
 
 ## Steep Parallax Mapping
@@ -48,6 +51,7 @@ for(int i = 0; i< 10; i++)
     currentDepth += depthStep;  
 }
 ```
+
 ## Parallax Occlusion Mapping
 
 视差遮蔽贴图与陡峭视差贴图类似，区别仅在于最后深度的选择；陡峭视差贴图最终的深度为步进深度的倍数，并且最终深度大于此位置的采样深度，而前一步的深度小于前一步位置的采样深度；针对此现象，我们可以在两者之间进行深度插值，这样最终采样深度就是一个连续的分布了；

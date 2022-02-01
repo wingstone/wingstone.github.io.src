@@ -1,11 +1,13 @@
 ---
 title: 'Monte Carlo Integration'
 date: 2020-09-06 14:35:52
-tags: [图形学,蒙特卡洛积分]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- 图形学
+tags:
+- 图形学
+- 蒙特卡洛积分
+metaAlignment: center
+coverMeta: out
 ---
 
 蒙特卡洛积分的简短介绍，以及PBRT中常用的函数分布；

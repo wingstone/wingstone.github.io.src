@@ -1,11 +1,13 @@
 ---
 title: '头发渲染——Kajiya model'
 date: 2020-09-16 12:19:32
-tags: [图形学,Rendering]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- Rendering
+tags:
+- Rendering
+- Hair
+metaAlignment: center
+coverMeta: out
 ---
 关键点：采用多边形建模，进行深度排序修正渲染顺序（因为半透问题），AO去模拟自阴影，两层高光，采用Tangent向量代替N进行高光计算；
 <!--more-->
@@ -48,6 +50,7 @@ float ShiftTangent(float3 T, float3 N, float shift)
     return normalize(shiftedT);
 }
 ```
+
 如下图：T'与T''是切变后的切向量；
 ![](https://wingstone.github.io/post-images/1600414455694.jpg)
 
@@ -84,6 +87,7 @@ Pass2：关闭深度写入，深度测试为Less，关闭alpha test，cull front
 Pass2：开启深度深度测试为Less并写入，关闭alpha test，cull back；
 
 ## 使用方案
+
 1. 纹理需求：base tex（发色纹理，包含Scretched noise）、alpha tex（需包含全不透区域）、tangent shift tex（模拟头发起伏形状）、specular noise tex（用于第二层高光sparkling）
 2. 模型需求：多边形建模，面片之间具有层次，且按照距表皮的距离进行排序合并；
 

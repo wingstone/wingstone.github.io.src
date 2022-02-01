@@ -1,11 +1,13 @@
 ---
 title: 'Mathematics about camera in graphics（图形学中关于相机的数学）'
 date: 2020-06-18 14:34:51
-tags: [图形学,engine]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- 图形学
+tags:
+- 图形学
+- Camera
+metaAlignment: center
+coverMeta: out
 ---
 
 以OpenGL中的右手坐标系为例，介绍引擎中和各种应用中跟相机有关的数学；
@@ -169,23 +171,26 @@ void ProcessMouseMovement(float xOffset, float yOffset, glm::vec3 focusPosition 
 针孔相机就是传统的透视相机，由于针孔无限小，这样从针孔投射的光线是唯一的，针对投影平面来说；投射光线的唯一也就导致无法多采样产生景深效果；
 
 透视相机的射线，只需要将相机坐标作为起点，相机与屏幕像素的连线作为方向即可；考虑到抗拒齿问题，一般还需要在像素区域内进行随机采样；
+
 ```C++
 //归一化屏幕坐标，范围：0~1
 Ray getRay(float screenX, float screenY, float randx, float randy)
 {
-    vector<float> dir = _up * std::tan(_fov / 2) *(screenY*2.0f-1.0f) + _right * std::tan(_fov / 2)*_aspect*(screenX*2.0f-1.0f) + _front;		//射线从origin发射
+    vector<float> dir = _up * std::tan(_fov / 2) *(screenY*2.0f-1.0f) + _right * std::tan(_fov / 2)*_aspect*(screenX*2.0f-1.0f) + _front;  //射线从origin发射
     dir = Normalize(dir);
     return Ray(_origin, dir);
 }
 ```
+
 ## 正交相机
 
 正交相机的射线，只需要将相机坐标作为起点，起点的坐标沿屏幕像素进行偏移即可；考虑到抗拒齿问题，一般还需要在像素区域内进行随机采样；
+
 ```C++
 //归一化屏幕坐标，范围：0~1
 Ray getRay(float screenX, float screenY, float randx, float randy)
 {
-    point origin = _origin + _right * (_aspect*(screenX*2.f - 1.f)) + _up * (screenY*2.f - 1.f);		//射线从像素发射
+    point origin = _origin + _right * (_aspect*(screenX*2.f - 1.f)) + _up * (screenY*2.f - 1.f);  //射线从像素发射
     return Ray(origin, _front);
 }
 ```
@@ -193,6 +198,7 @@ Ray getRay(float screenX, float screenY, float randx, float randy)
 ## 环境相机
 
 环境相机实际就是将像素的x、y坐标映射到体积角上，然后计算出相应体积角下的射线；整个像素映射下来刚好覆盖整个4pi体积角；
+
 ```C++
 Ray getRay(float screenX, float screenY, float randx, float randy)
 {
@@ -207,15 +213,15 @@ Ray getRay(float screenX, float screenY, float randx, float randy)
 
 薄透镜相机是对传统透镜的模拟，只不过忽略了透镜的实际厚度影响；为了模拟真实的相机，需要加入**光圈**、**焦距**、**焦平面距透镜距离（像距）**；整个相机的[示意图](http://www.360doc.com/content/18/0104/17/50354283_719051589.shtml)，光圈所在位置实际就是透镜所在位置；关键的问题是如何根据相机模型，以及屏幕（像平面）上坐标获取所发射出来的射线；过程如下：
 
- - 在透镜（光圈）上均匀采样，作为光线的起点，来获取所有经过光圈的光线；
- - 为了模拟对焦，像平面上坐标点与透镜中心的连线，相交于焦平面一点；此点即为所有采样射线必须经过的焦点；
- - 前面两个步骤所获取的光圈采样点、焦平面焦点即可决定采样的光线；
+- 在透镜（光圈）上均匀采样，作为光线的起点，来获取所有经过光圈的光线；
+- 为了模拟对焦，像平面上坐标点与透镜中心的连线，相交于焦平面一点；此点即为所有采样射线必须经过的焦点；
+- 前面两个步骤所获取的光圈采样点、焦平面焦点即可决定采样的光线；
 
 ```C++
 //透镜描述
-float _apertureRedius;	//光圈半径
-float _focusDistance;		//焦距
-float _imageDistance;		//像距
+float _apertureRedius; //光圈半径
+float _focusDistance;  //焦距
+float _imageDistance;  //像距
 
 //画布描述
 float _height;
@@ -228,7 +234,7 @@ Ray getRay(float screenX, float screenY, float randx, float randy)
     point lensPoint = _origin + _front * _imageDistance;
     point focusPoint = lensPoint + (lensPoint - screenPoint) * (_focusDistance / _imageDistance);
 
-    point origin = lensPoint + _right * (std::sqrt(randx) * std::cos(randy*2.f*PI)) + _up * (std::sqrt(randx) * std::sin(randy*2.f*PI)) *_apertureRedius;	//射线从透镜发射
+    point origin = lensPoint + _right * (std::sqrt(randx) * std::cos(randy*2.f*PI)) + _up * (std::sqrt(randx) * std::sin(randy*2.f*PI)) *_apertureRedius; //射线从透镜发射
     vector<float> dir = Normalize(focusPoint - origin);
     return Ray(origin, dir);
 }
@@ -262,7 +268,6 @@ Ray getRay(float screenX, float screenY, float randx, float randy)
 
 1. 先根据与相机方向夹角随着到图像中心距离线性变换的定义，由像素到图像中心的距离计算出出射光线在球坐标系中的theta（0-pi）。
 2. 接着再根据像素位置距离图像中心的水平距离和垂直距离求出出射光线在极坐标系中的phi（0-2pi）；
-
 
 ## 参考文章
 

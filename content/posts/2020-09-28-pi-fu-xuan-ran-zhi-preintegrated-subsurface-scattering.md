@@ -1,13 +1,17 @@
 ---
 title: '皮肤渲染——Preintegrated Subsurface Scattering'
 date: 2020-09-28 12:18:24
-tags: [图形学,Rendering]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- Rendering
+tags:
+- Rendering
+- Skin
+metaAlignment: center
+coverMeta: out
+draft: true
 ---
 预积分皮肤散射主要解决三种皮肤散射情况：
+
 1. 表面弯曲引起的散射（Surface Curvature）；
 2. 表面小凸起引起的散射（Small Surface Bumps）；
 3. 投影边缘引起的散射（Shadows）；
@@ -22,7 +26,7 @@ isTop: false
 积分方程为：
 
 $$
-D(\theta, r) = \frac{\int_{-\pi/2}^{\pi/2} {cos(\theta+x)*R(2rsin(x/2))} \,{\rm d}x}{\int_{-\pi/2}^{\pi/2} {R(2rsin(x/2))} \,{\rm d}x} 
+D(\theta, r) = \frac{\int_{-\pi/2}^{\pi/2} {cos(\theta+x)*R(2rsin(x/2))} \,{\rm d}x}{\int_{-\pi/2}^{\pi/2} {R(2rsin(x/2))} \,{\rm d}x}
 $$
 
 式中R(d)表示Diffusion profile，表示相应距离下的辐射度，d表示距离。该式表示在曲率半径为r的半球下，对应$\theta$角度下，其它所有角度在该角度下的散射强度；对应模型如下图所示：
@@ -38,6 +42,7 @@ $$
 ![曲率，预积分贴图](https://wingstone.github.io/post-images/1601283515546.jpg)
 
 其中曲率的求法可在shader中借助偏导函数计算，即：
+
 ```C++
 float3 dn = fwidth(N);
 float3 dp = fwidth(P);
@@ -65,7 +70,7 @@ float c = length(dn)/length(dp);
 
 积分的过程是针对位置进行积分，需要将阴影值映射到位置上后才能积分，针对不同的软阴影方法，映射函数是不同的；我们用P()表示阴影值与到blur kernel距离的函数，则此映射为$p^-{1}()$；具体的积分方程为：
 $$
-P_S(s,w)  = \frac{\int_{-\infty}^{\infty} {P^'(P^{-1}(s)+x)R(x/w)} \,{\rm d}x}{\int_{-\infty}^{\infty} {R(x/w)} \,{\rm d}x} 
+P_S(s,w)  = \frac{\int_{-\infty}^{\infty} {P^'(P^{-1}(s)+x)R(x/w)} \,{\rm d}x}{\int_{-\infty}^{\infty} {R(x/w)} \,{\rm d}x}
 $$
 针对box blur软阴影（PCF）方法，其过程如下：
 ![投影预积分](https://wingstone.github.io/post-images/1601347525242.jpg)
@@ -83,6 +88,7 @@ $$
 使用指数函数来处理距离，典型的使用`exp(-depth * sigma_t)`即可，这里sigma_t表示物体的透射系数；
 
 额外需要处理的问题包括：
+
 1. 光照的正面会得到穿过距离为0的问题，需要使用ndl进行处理，不能只是用ndl的sign值，否则会产生锯齿，不能产生平滑结果；
 2. 同理只有视角背向光源时，才能产生透射现象，需要使用vdl进行处理；
 
@@ -96,6 +102,7 @@ $$
 3. 对几何拓扑做出了大量的假设；
 
 ## Reference
+
 1. [Penner pre-integrated skin rendering (siggraph 2011 advances in real-time rendering course)](https://www.slideshare.net/leegoonz/penner-preintegrated-skin-rendering-siggraph-2011-advances-in-realtime-rendering-course)：PPT
 2. GPU Pro 2, Part 2. Rendering, Chapter 1. Pre-Intergrated Skin Shading：Book
 3. [Simon's Tech Blog](http://simonstechblog.blogspot.com/2015/02/pre-integrated-skin-shading.html)：使用数值插值代替预积分贴图

@@ -25,6 +25,7 @@ tags:
 ComputerShader（简称CS）下的UV获取比较特殊，因为CS并不走正常的GPU绘制流水线，只是单纯的用多线程进行并行计算，所以我们在CS中获取UV值一般是由ThreadID除以贴图分辨率来获取；
 
 简易CS Example：
+
 ```C
 #pragma kernel CSMain
 
@@ -44,6 +45,7 @@ threadID即为我们分配的线程ID，每个线程有唯一值，对于图片�
 ## 总结
 
 之所以写下这篇文章，是因为在CS中，我们有时候需要使用采样器来采贴图，即：
+
 ```c++
 Texture2D<float4> myTexture;
 SamplerState linearClampSampler;
@@ -51,6 +53,7 @@ float4 color = myTexture.SampleLevel(linearClampSampler, uv, 0);
 ```
 
 这个时候我们的采样uv就不能是简单地ThreadID除以贴图分辨率来获取，还要转化为正常光栅化流程下的uv坐标，这时的采样结果才是正确的；即：
+
 ```c++
 float2 uv = id.xy/_Size.zw + 0.5*_Size.xy;
 ```

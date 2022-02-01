@@ -1,11 +1,13 @@
 ---
 title: '排列与组合'
 date: 2020-09-07 14:37:00
-tags: [算法,排列与组合]
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- 算法
+tags:
+- 算法
+- 排列与组合
+metaAlignment: center
+coverMeta: out
 ---
 
 关于排列与组合的算法问题
