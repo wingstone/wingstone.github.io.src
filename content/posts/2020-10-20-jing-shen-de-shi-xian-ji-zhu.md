@@ -1,11 +1,14 @@
 ---
 title: '景深的实现技术'
 date: 2020-10-20 16:47:41
-tags: []
-published: true
-hideInList: false
-feature: 
-isTop: false
+categories:
+- 总结
+tags:
+- 总结
+- DOF
+metaAlignment: center
+coverMeta: out
+draft: true
 ---
 景深的实现技术有很多，针对不同的使用场景，可以使用不同的方法；
 <!--more-->
