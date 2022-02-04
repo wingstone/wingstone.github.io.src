@@ -4,7 +4,6 @@ date: 2020-09-06 14:35:52
 categories:
 - 图形学
 tags:
-- 图形学
 - 蒙特卡洛积分
 metaAlignment: center
 coverMeta: out

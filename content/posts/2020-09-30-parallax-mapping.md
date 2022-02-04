@@ -1,5 +1,5 @@
 ---
-title: '贴图技术——Parallax Mapping（视差贴图）'
+title: 'Parallax Mapping（视差贴图）'
 date: 2020-09-30 13:10:15
 categories:
 - Rendering

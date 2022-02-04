@@ -5,8 +5,7 @@ date: 2022-01-04T11:43:02+08:00
 categories:
 - GPU Pro
 tags:
-- lighting
-- efficient
+- Lighting
 metaAlignment: center
 coverMeta: out
 draft: true
@@ -93,4 +92,4 @@ TL的解决办法：使用精确的light shape来表示光源的范围，使用�
 
 ## Open Source
 
-[GPU-Pro-7](https://github.com/wolfgangfengel/GPU-Pro-7)
+[GPU-Pro-7](https://github.com/wolfgangfengel/GPU-Pro-7)；

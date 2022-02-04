@@ -1,5 +1,5 @@
 ---
-title: '排列与组合'
+title: 'Combination and Permutation（排列与组合）'
 date: 2020-09-07 14:37:00
 categories:
 - 算法

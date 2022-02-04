@@ -2,11 +2,9 @@
 title: 'Pipeline——Rendering Path（渲染路径）'
 date: 2020-09-14 14:51:39
 categories:
-- Unity
+- 图形学
 tags:
-- Unity
-- 资源汇总
-- 程序化生成
+- 图形学
 metaAlignment: center
 coverMeta: out
 ---

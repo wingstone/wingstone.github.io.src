@@ -3,7 +3,7 @@ title: "Unity程序化生成插件合集"
 author: wingstone
 date: 2022-01-30
 categories:
-- Unity
+- 资源汇总
 tags:
 - Unity
 - 资源汇总

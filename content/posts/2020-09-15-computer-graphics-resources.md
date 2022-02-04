@@ -1,5 +1,5 @@
 ---
-title: '图形学资源汇总'
+title: 'Computer Graphics Resources'
 date: 2020-09-15 16:10:15
 categories:
 - 资源汇总

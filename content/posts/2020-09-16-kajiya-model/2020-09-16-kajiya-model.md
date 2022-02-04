@@ -2,9 +2,8 @@
 title: '头发渲染——Kajiya model'
 date: 2020-09-16 12:19:32
 categories:
-- Rendering
+- SIGGRAPH
 tags:
-- Rendering
 - Hair
 metaAlignment: center
 coverMeta: out
@@ -22,7 +21,10 @@ coverMeta: out
 ## 高光计算
 
 主要的高光计算都集成在下面这张PPT上；
-![](https://wingstone.github.io/post-images/1600411957731.jpg)
+
+![specular_calculate](specular_calculate.jpg)
+<center>specular计算</center>
+
 可以看出，kajiya计算模型与blin-phong模型比较类似，**本质上都是采用pow(NdotH, specularity)来进行的高光计算**；但是**kajiya模型没有使用多边形几何的法线来作为法线计算，而是采用法线平面的概念来作为法线的代替计算**；
 
 > 虽然几何是多边形，但是仍然将其作为发丝来看待，Tangent向量作为发丝的方向；而发丝的法线应该位于与发丝垂直的平面上，且发丝与此平面的交点作为法线的起点；
@@ -32,7 +34,9 @@ coverMeta: out
 ## 模拟真正的头发高光
 
 为了模拟头发真正的高光，还要基于对头发高光的观察进行部分假设，相应的观察假设在这张PPT上；
-![](https://wingstone.github.io/post-images/1600413042532.jpg)
+
+![hair_ref](hair_ref.jpg)
+<center>hair参考</center>
 
 1. 头发有两层高光；
 2. 主高光切变流向朝向发梢；
@@ -52,7 +56,9 @@ float ShiftTangent(float3 T, float3 N, float shift)
 ```
 
 如下图：T'与T''是切变后的切向量；
-![](https://wingstone.github.io/post-images/1600414455694.jpg)
+
+![tangent](tangent.jpg)
+<center>tangent计算</center>
 
 T表示发丝的方向，那么当发丝方向发生变化时，N（多边形对应法线）自然而然也同样产生变化，偏移后的N为：
 
@@ -80,7 +86,9 @@ N = cross(T, B);
 虽然使用模型内部排序就能解决发簇之间的渲染顺序问题，但是对于发簇内部的渲染顺序也需要控制，不然会会出现先绘制发簇前面，再绘制背面的问题；有时也会出现先看到靠近头皮的发簇，再看到远离头皮的发簇的情况，特别是针对女性的头发；
 
 因此为了解决这些问题，需要引入多pass渲染来解决，如下图所示：
-![](https://wingstone.github.io/post-images/1600416013592.jpg)
+
+![pass](pass.jpg)
+<center>pass设置</center>
 
 Pass1：开启深度测试为Less并写入，开启alpha test，cull back；
 Pass2：关闭深度写入，深度测试为Less，关闭alpha test，cull front；
@@ -90,8 +98,6 @@ Pass2：开启深度深度测试为Less并写入，关闭alpha test，cull back�
 
 1. 纹理需求：base tex（发色纹理，包含Scretched noise）、alpha tex（需包含全不透区域）、tangent shift tex（模拟头发起伏形状）、specular noise tex（用于第二层高光sparkling）
 2. 模型需求：多边形建模，面片之间具有层次，且按照距表皮的距离进行排序合并；
-
-> 碎碎念：没想到Kajiya模型竟然还中了2004年SIGGRAPH，牛批牛批！
 
 ## Reference
 

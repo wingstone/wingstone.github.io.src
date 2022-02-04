@@ -3,7 +3,10 @@ title: fbx sdk使用总结
 author: wingstone
 date: 2022-01-15
 categories:
-- idea
+- 总结
+tags:
+- 总结
+- fbx
 metaAlignment: center
 coverMeta: out
 ---

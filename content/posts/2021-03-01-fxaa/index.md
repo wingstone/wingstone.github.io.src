@@ -6,19 +6,22 @@ categories:
 tags: 
 - FXAA
 ---
-FXAA是非常方便且高效的抗拒齿方法，本文主要依据FXAA白皮书进行理论介绍[^1]，然后针对一些实现方法进行探讨；
+FXAA是非常方便且高效的抗拒齿方法，本文主要依据FXAA白皮书进行理论介绍[^1]，然后针对一些实现方法进行探讨[^2]；
 <!--more-->
 
 ## FXAA特点
 
 1. 可减弱明显的锯齿，同时保持画面锐利的部分；最重要的是，具有很好的实时性；
-2. 可用于几何抗拒齿也可用于shading抗拒齿，具有处理single-pixel（single pixel lines）与sub-pixel锯齿（这里的sub-pixel并不是指真正意义上的sub-pixel，而是指AA中的firefly问题）的逻辑；
+2. 可用于几何抗拒齿也可用于shading抗拒齿，具有处理single-pixel与sub-pixel锯齿的逻辑；
 3. 使用一个pass即可实现FXAA，非常易于集成；与MSAA相比能节省大量内存；
 4. 对于延迟渲染来说，相比MSAA与SSAA，可以提供优秀的性能；
 
+> 这里的single-pixel锯齿指single pixel lines问题；
+> sub-pixel锯齿中的sub-pixel也不是指真正意义上的sub-pixel，而是指AA中的firefly问题，以及渲染中常用一些jitter所带来的问题；
+
 ## FXAA官方样例
 
-官方Demo需要到NVIDIA官网进行下载，在[这里](https://developer.nvidia.com/gameworksdownload)选择GAMEWORKS->Graphics Library->D3D Graphics and Compute Samples进行下载；
+官方Demo需要到NVIDIA官网进行下载，在[这里](https://developer.nvidia.com/gameworksdownload)选择GAMEWORKS->Graphics Library->D3D Graphics and Compute Samples进行下载[^3]；
 
 Demo中预制了不同的preset，用户可以从中获取性能与质量之间的权衡；
 
@@ -71,6 +74,9 @@ FXAA需要非线性的rgb颜色空间（眼睛感知的空间）作为输入以�
 7. 使用偏移后坐标重新采样贴图；
 8. 最后使用低通滤波来处理sub-pixel aliasing，根据sub-pixel aliasing的程度进行blend；
 
+![fxaa algorithm](fxaa_algorithm.jpg)
+<center>fxaa algorithm</center>
+
 ### Luminance Conversion
 
 Nvidia建议使用red以及green通道来计算亮度进行优化，人眼对这两种颜色最为敏感；亮度计算方法如下：
@@ -104,16 +110,16 @@ if(range < max(FXAA_EDGE_THRESHOLD_MIN, rangeMax * FXAA_EDGE_THRESHOLD))        
 
 FXAA_EDGE_THRESHOLD：处理local contrast的阈值比例
 
-1/3 – too little；
-1/4 – low quality；
-1/8 – high quality；
-1/16 – overkill；
+- 1/3 – too little；
+- 1/4 – low quality；
+- 1/8 – high quality；
+- 1/16 – overkill；
 
 FXAA_EDGE_THRESHOLD_MIN：处理暗部区域的阈值；
 
-1/32 – visible limit；
-1/16 – high quality；
-1/12 – upper limit (start of visible unfiltered edges);
+- 1/32 – visible limit；
+- 1/16 – high quality；
+- 1/12 – upper limit (start of visible unfiltered edges);
 
 ### Sub-pixel Aliasing Test
 
@@ -141,21 +147,24 @@ rgbL *= FxaaToFloat3(1.0/9.0);
 #### Tuning Defines
 
 FXAA_SUBPIX：控制subpix filtering的开启；
-0 – turn off；
-1 – turn on；
-2 – turn on force full (ignore FXAA_SUBPIX_TRIM and CAP)
+
+- 0 – turn off；
+- 1 – turn on；
+- 2 – turn on force full (ignore FXAA_SUBPIX_TRIM and CAP)
 
 FXAA_SUBPIX_TRIM：控制sub-pixel aliasing的移除程度；
-1/2 – low removal；
-1/3 – medium removal；
-1/4 – default removal；
-1/8 – high removal；
-0 – complete removal；
+
+- 1/2 – low removal；
+- 1/3 – medium removal；
+- 1/4 – default removal；
+- 1/8 – high removal；
+- 0 – complete removal；
 
 FXAA_SUBPIX_CAP：确保细节不会被完全抹除；
-3/4 – default amount of filtering；
-7/8 – high amount of filtering；
-1 – no capping of filtering；
+
+- 3/4 – default amount of filtering；
+- 7/8 – high amount of filtering；
+- 1 – no capping of filtering；
 
 ### Vertical/Horizontal Edge Test
 
@@ -205,22 +214,30 @@ FXAA_SEARCH_STEPS：控制最大查找步数；
 
 FXAA_SEARCH_ACCELERATION：控制使用anisotropic filtering加速的程度；
 
-1 – no acceleration；
-2 – skip by 2 pixels；
-3 – skip by 3 pixels；
-4 – skip by 4 pixels (hard upper limit)；
+- 1 – no acceleration；
+- 2 – skip by 2 pixels；
+- 3 – skip by 3 pixels；
+- 4 – skip by 4 pixels (hard upper limit)；
 
 FXAA_SEARCH_THRESHOLD：控制何时停止查找；
 
-1/4 – seems best quality wise；
+- 1/4 – seems best quality wise；
 
 ## Unity中FXAA
 
-Unity提供了两种形式的FXAA：
+Unity提供了两种形式的FXAA[^4]：
+
+### Post process FXAA
 
 一种是PostProcess插件中的FXAA，其实现方式与NVIDIA公开的方法基本一致，直接引用了NVIDIA公开的fxaa头文件；
 
-另外一种是URP里面内置的FXAA实现，具体可以查看[源码](https://github.com/Unity-Technologies/Graphics/blob/master/com.unity.render-pipelines.universal/Shaders/PostProcessing/Common.hlsl)；能大概看出来，此FXAA移除了sub-pixel aliasing，将整个AA过程分割为两个部分，一个是dir方向的计算，一个是沿dir方向的blur，从而达到AA的效果；
+### URP FXAA
+
+一种是URP里面内置的FXAA，具体实现可以查看[源码](https://github.com/Unity-Technologies/Graphics/blob/master/com.unity.render-pipelines.universal/Shaders/PostProcessing/Common.hlsl)；能大概看出来，此FXAA移除了sub-pixel aliasing，将整个AA过程分割为两个部分，一个是dir方向的计算，一个是沿dir方向的blur，从而达到AA的效果；
+
+其中dir的计算通过**左上左下右上右下**四个像素的差值来计算；blur的程度按照正常流程需要计算edge的长度来控制，URP直接沿dir方向进行四个采样，采样步长由dir控制；然后根据四个采样与中心采样的亮度比较，来决定最后使用什么程度的blur值；
+
+URP的FXAA可以说是NVIDIA FXAA的简化形式，非常适用于对性能要求极高的平台；实际上URP中的FXAA还可以加上NVIDIA提供FXAA里面的阈值检测机制，从而提前退出不必要的AA计算，得到究极高效版FXAA；
 
 ## references
 
