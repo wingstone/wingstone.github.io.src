@@ -8,7 +8,7 @@ tags:
 - Lighting
 metaAlignment: center
 coverMeta: out
-draft: true
+draft: false
 ---
 
 Fptl是基于tiled base lighting而开发出来的更高效的光照计算方法，相比于tbl的光源剔除粒度（tiled级别下的剔除），Fptl可以达到逐像素级别的剔除，从而使光照计算更加高效。
@@ -70,7 +70,7 @@ TL的解决办法：使用精确的light shape来表示光源的范围，使用�
 
 ## 实现细节
 
-现代GPU都是来靠切换jobs来隐藏lantency；每个CU（compute unit，include compute，vertex shading，pixel shading）所占用的jobs越少，则CPU隐藏lantency的能力越差；
+现代GPU都是来靠切换jobs来隐藏lantency；每个CU（compute unit，include compute，vertex shading，pixel shading）所占用的jobs越少，**则GPU隐藏lantency的能力越差**；
 
 实时证明shadowmap的生成与light list的生成刚好是非常匹配的，shadow map主要消耗吞吐量，光栅化，只需要一个depth pass即可，几乎没有什么ALU的消耗，而Fptl则恰恰相反，Fptl是一个严重消耗ALU的算法，需要进行大量时间进行相交运算；两者进行异步运算，可以节省大量运算时间；
 
@@ -78,17 +78,38 @@ TL的解决办法：使用精确的light shape来表示光源的范围，使用�
 
 在针对相机的操作中，我们对光源按照光源形状进行了排序，这使得我们能够使用嵌套循环来处理所有光源计算，而避免使用判断语句（GPU使用Wrap thread来进行运作，若同一Wrap里面分支都跑到了，就会使得运作流程跑两个分支的时间）；官方里面Sphere与Capsule为一个类型，cone与widget为一个类型，box为一个类型；
 
-为了生成screen space的AABB，需要light的OBB（iented bounding box）作为输入，同时为了支持spot与widget光源，OBB需要一端的4个顶点支持非均匀缩放；为了计算AABB，需要计算视锥体与OBB的相交体，以及对应的点集；算法为使用视锥体来裁剪OBB的quad，并使用最终的顶点集来更新对应的AABB，即视锥体8个顶点中的任意一点位于OBB内，就必需要更新AABB；
+为了生成screen space的AABB，需要light的OBB（iented bounding box）作为输入，同时为了支持spot与widget光源，OBB需要一端的4个顶点支持非均匀缩放；为了计算AABB，需要计算视锥体与OBB的相交体对应的点集，然后使用这些点集来更新AABB；算法为使用视锥体来裁剪非均匀缩放后OBB的quad，来得到两者的相交点集；当视锥体8个顶点中的任意一点位于OBB内，就必需要更新AABB；最后，需要计算light bounding sphere的AABB，然后再计算此AABB与之前计算得来的AABB的交集；此交集作为最后的计算结果；
 
-> 最后，需要计算light bounding sphere的AABB，然后再计算此AABB与之前计算得来的AABB的交集；
+> 不是很懂最后一个步骤，个人认为裁剪后的aabb必定为bouding sphere对应aabb的子集，那么两者的交集必定还为裁剪后的aabb；
 
 整个过程需要大量的计算，不过只需要针对一个相机计算一次，可以选择在CPU执行，官方还是选择在GPU上使用异步CS来进行计算；
 
 ### per tile level
 
-这里使用的tile为16x16像素；因此dispatch的线程组数量为：(width+15)/16，(height+15)/16；kernel被声明为一个wavefront，即64x1x1；
+这里使用的tile为16x16像素；dispatch的线程组数量为：(width+15)/16，(height+15)/16；kernel被声明为一个wavefront，即64x1x1，每个thread处理四个像素；
 
-首先我们要计算Screen space AABB，因此需要计算tile内depth的最大值与最小值；
+首先我们要计算每个tile关联到的AABB，因此需要计算tile内depth的最大值与最小值；每个tile为16x16大小，而我们的thread group包含64个thread，因此需要每个thread计算4个像素深度的minimum与maximum，并借助InterlockedMin()与InterlockedMax()来得到tile的最大值与最小值；
+
+随后进行初步的光照剔除，通过计算tile的aabb与light的aabb是否相交即可，与light的形状无关；同样由于thread group包含了64个thread，每个thread处理numVisibleLights/64个光源即可；另外使用一个thread group可以允许我们保持通过测试的光源的顺序，因为这64个thread run in lock-step；最终的light list记过存储到LDS中；
+
+在tiled lighting中，会使用bounding sphere与tile的aabb进行求交测试，这样需要针对tile的6个plane进行相交测试，会消耗更多的计算量；对于spot这种light形状，其bounding sphere会占用很多无用的空间，不如使用紧致的obb来进行测试更加高效；
+
+最后，我们运行更精细的剔除。精细剔除的light list为前面得到的初步light list的子集；每个像素会进行精细测试，判断其世界空间坐标是否真正与light shape volume相交，相交的结果作为真正的fine pruned light list；
+
+实现过程中，每个thread负责2x2的pixels；若某一light shape volume包含了四个像素中的一个，该light会标记到64bit的mask上（也决定了每个tile最多只能处理64盏灯）；当整个group的thread标记完毕后，会使用`InterlockedOr()`来收集mask，将不必要的light从初步的light list移除后，我们将得到的final fine pruned list写回内存；
+
+## 引擎集成
+
+这里介绍的实际上是**Rise of the Tomb Raider**中的集成，考虑到带宽问题，原文将depth、normal、specular power存储到R8B8G8A8的narrow gbuffer上；specular power的正负用来表示specular reflection是否开启；整个流程如下所示：
+
+![flow chart](flow.jpg)
+<center>流程图</center>
+
+这里normal pass并没有albedo等其他gbuffer产生（提出这个方法时估计PBR还没有流行），只有前面的norrow gbuffer生成，并伴随着screen space AABB的异步计算；shadowmap的计算伴随着fine pruned light lists的异步计算；Differred lighting的计算不涉及到材质的颜色问题，并且将diffuse与specular分开存储；在composite pass，会将前面得到的light成分材质的颜色结合，得到最终的光照延迟光照结果；
+
+对于一些自定义的材质，如眼睛、头发、皮肤等，会在延迟渲染后，使用前向渲染进行着色；为了避免overdraw，在进行延迟渲染前，会使用stencil将前向渲染的像素标记出来（normal pass），在延迟渲染时开启模板测试即可；
+
+在存储light list时，可以选择不同的方式；最明显的方式为，对每个tile花费固定的8bit或16bit对应相应的light索引；若使用8bit，则屏幕只支持256盏光，16bit可以支持更多；
 
 ## Open Source
 

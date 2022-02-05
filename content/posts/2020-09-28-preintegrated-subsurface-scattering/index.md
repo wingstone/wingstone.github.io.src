@@ -62,9 +62,11 @@ Simon对得到的积分贴图进行了公式拟合[^3]，不过拟合公式的�
 
 对于specular使用正常的normalmap，对于diffuse的rgb分别使用针对不同Diffusion profile处理后的normalmap，因此需要4张normalmap；
 
-为了效率考虑，可以使用一种高精度无滤波的normalmap，一张低精度预滤波的normalmap分别针对rgb插值来近似相应的预滤波处理；需要2张normalmap；
+为了效率考虑，可以使用一种高精度无滤波的normalmap，一张低精度预滤波的normalmap，针对rgb使用不同参数调制两者之间的插值来近似diffusion profile处理的结果；
 
-可以将低精度无滤波的normalmap省略，直接使用模型法线来代替，这样就可以指使用一张高精度无滤波的normalmap进行处理了；不过这样做并不能保证结果的合理性，纯粹为表现导向的使用策略；
+可以将低精度预滤波的normalmap省略，使用高精度normalmap的低mip来作为低精度预滤波的结果，更近一步可以直接使用模型法线来代替；具体的选择需要在效果与性能之间权衡；
+
+由于针对rgb调制过后的法线有三个，因此要采样三次前面的preintegrated map；针对不同的性能要求，可以选择性的省略这一环节；
 
 ## Shadows Scattering
 
@@ -90,9 +92,58 @@ $$
 ![预积分渲染结果](result.jpg)
 <center>预积分渲染结果</center>
 
+## extended preintegrated subsurface scattering
+
+在原文中，作者在展望中写到，未来会将预积分应用于环境光，以及考虑多个主轴区域对结果的影响；然后在游戏**Ghost of Tsushima**中就实装了这些展望[^5];
+
+扩展最重要的假设，就是不再认为预积分贴图的计算是在球面积分得到的，而是在柱面上；此时计算预积分贴图使用不再是前面的redial diffusion profile，而应该linear diffusion profile（通过对redial积分获得）；此时使用的曲率也不再是平均曲率，而是方向曲率；
+
+![direction_model](direction_model.jpg)
+<center>柱状模型</center>
+
+> 需要注意的是，对于环境光的预积分计算仍需要使用球面假设；因为原文积分使用的zonal harmonics，只能使用redial diffusion profile；
+
+不同光照方向下的方向曲率可以通过曲率向量变换，如下所示：
+
+![conversion](conversion.jpg)
+<center>曲率变换</center>
+
+其中曲率张量的定义为：
+
+![tensor](tensor.jpg)
+<center>曲率张量</center>
+
+> 原文有说曲率张量为2x2的矩阵，由此可见上图可能有误，上图的转置向量应该位于左方，右方为非转置向量；
+> 关于曲率张量的计算方法，详细细节需要参考论文[^6];
+
+由于曲率张量为轴对称的，因此只需要记录三个参数，加上用来计算环境光需要的平均曲率，四个参数刚好可以存储到顶点的一个4byte属性中；
+
+方向曲率的转换代码如下：
+
+```c++
+float CurvatureFromLight(    float3 tangent,    float3 bitangent,    float3 curvTensor,    float3 lightDir)
+{   
+    // Project light vector into tangent plane    
+    float2 lightDirProj = float2(dot(lightDir, tangent), dot(lightDir, bitangent));  
+    
+    // NOTE (jasminp) We should normalize lightDirProj here in order to correctly  
+    //    calculate curvature in the light direction projected to the tangent plane.    
+    //    However, it makes no perceptible difference, since the skin LUT does not vary  
+    //    much with curvature when N.L is large.   
+    
+    float curvature = curvTensor.x * GSquare(lightDirProj.x) +     
+    2.0f * curvTensor.y * lightDirProj.x * lightDirProj.y +
+    curvTensor.z * GSquare(lightDirProj.y);
+    
+    return curvature;
+}
+```
+
 ## Reference
 
 [^1]: [Penner pre-integrated skin rendering (siggraph 2011 advances in real-time rendering course)](https://www.slideshare.net/leegoonz/penner-preintegrated-skin-rendering-siggraph-2011-advances-in-realtime-rendering-course)
 [^2]: GPU Pro 2, Part 2. Rendering, Chapter 1. Pre-Intergrated Skin Shading
 [^3]: [Simon's Tech Blog](http://simonstechblog.blogspot.com/2015/02/pre-integrated-skin-shading.html)
 [^4]: [GPU Gems 1, Real-Time Approximations to Subsurface Scattering](https://developer.nvidia.com/gpugems/gpugems/part-iii-materials/chapter-16-real-time-approximations-subsurface-scattering)
+[^5]: [Ghost of Tsushima](https://blog.selfshadow.com/publications/s2020-shading-course/patry/slides/index.html)
+[^6]: [Estimating Curvatures and Their Derivatives on Triangle Meshes](https://geometry.stanford.edu/papers/ng-test1/ng-test1.pdf)
