@@ -28,8 +28,22 @@ coverMeta: out
 可以看出，kajiya计算模型与blin-phong模型比较类似，**本质上都是采用pow(NdotH, specularity)来进行的高光计算**；但是**kajiya模型没有使用多边形几何的法线来作为法线计算，而是采用法线平面的概念来作为法线的代替计算**；
 
 > 虽然几何是多边形，但是仍然将其作为发丝来看待，Tangent向量作为发丝的方向；而发丝的法线应该位于与发丝垂直的平面上，且发丝与此平面的交点作为法线的起点；
+>
+> 图片中说法线位于T、V所决定的平面上，应该是错的；从公式中能够看出，应该是位于T、H所在的平面上才对；
 
-法线平面即红色平面所显示的，法线平面中真正的法线，有T向量、H向量所决定的平面，与法线平面的交线来决定，我们将这里决定出来的法线用N1（区别于真正的多边形几何法线）来代替；由于T、H、N1都是单位向量，由几何关系可以得到**N1dotH = sin(T,H)**，到此，我们就可以使用T、H来进行高光计算了；
+法线平面即红色平面所显示的，法线平面中真正的法线，由T向量、H向量所决定的平面，与法线平面的交线来决定，我们将这里决定出来的法线用N1（区别于真正的多边形几何法线）来代替；由于T、H、N1都是单位向量，由几何关系可以得到**N1dotH = sin(T,H)**，到此，我们就可以使用T、H来进行高光计算了；
+
+```c++
+float StrandSpecular(float3 T, float3 V,
+float3 L,float exponent)
+{
+    float3 H = normalize(L+ V);
+    float dotTH= dot(T, H);
+    float sinTH= sqrt(1.0 -dotTH*dotTH);
+    float dirAtten= smoothstep(-1.0, 0.0, dot(T, H));
+    return dirAtten* pow(sinTH, exponent);
+}
+```
 
 ## 模拟真正的头发高光
 
@@ -70,6 +84,32 @@ N = cross(T, B);
 > 实质上，N对T的偏移，是模拟头发的起伏，即发丝方向突出多边形平面或凹陷多边形平面；
 
 次高光的闪烁效果模拟比较简单，只需要使用一个噪音纹理与次高光相乘即可；
+
+总的代码为：
+
+```c++
+float4 HairLighting(float3 tangent,float3 normal,float3 lightVec, float3 viewVec, float2 uv, float ambOcc)
+{ 
+    // shift tangents
+    float shiftTex = tex2D (tSpecShift, uv) – 0.5;
+    float3 t1 = ShiftTangent(tangent, normal, primaryShift + shiftTex);
+    float3 t2 = ShiftTangent(tangent, normal, secondaryShift + shiftTex);
+    // diffuse lighting: the lerp shifts the shadow boundary for a softer look
+    float3 diffuse = saturate (lerp (0.25, 1.0, dot(normal, lightVec));
+    diffuse *= diffuseColor;
+    // specular lighting
+    float3 specular = specularColor1*StrandSpecular(t1, viewVec, lightVec, specExp1);
+    // add 2nd specular term, modulated with noise texture
+    float specMask= tex2D (tSpecMask, uv); // approximate sparkles using texture
+    specular += specularColor2* specMask*StrandSpecular(t2, vieVec, lightVec, specExp2);
+    // final color assembly
+    float4 o;
+    o.rgb = (diffuse + specular) * tex2D (tBase, uv) * lightColor;
+    o.rgb *= ambOcc;             // modulate color by ambient occlusion term
+    o.a = tex2D (tAlpha, uv);    // read alpha texture
+    return o;
+}
+```
 
 ## 渲染排序问题
 

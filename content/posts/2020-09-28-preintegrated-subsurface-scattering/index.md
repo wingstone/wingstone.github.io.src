@@ -113,7 +113,6 @@ $$
 ![tensor](tensor.jpg)
 <center>曲率张量</center>
 
-> 原文有说曲率张量为2x2的矩阵，由此可见上图可能有误，上图的转置向量应该位于左方，右方为非转置向量；
 > 关于曲率张量的计算方法，详细细节需要参考论文[^6];
 
 由于曲率张量为轴对称的，因此只需要记录三个参数，加上用来计算环境光需要的平均曲率，四个参数刚好可以存储到顶点的一个4byte属性中；
@@ -127,9 +126,9 @@ float CurvatureFromLight(    float3 tangent,    float3 bitangent,    float3 curv
     float2 lightDirProj = float2(dot(lightDir, tangent), dot(lightDir, bitangent));  
     
     // NOTE (jasminp) We should normalize lightDirProj here in order to correctly  
-    //    calculate curvature in the light direction projected to the tangent plane.    
-    //    However, it makes no perceptible difference, since the skin LUT does not vary  
-    //    much with curvature when N.L is large.   
+    // calculate curvature in the light direction projected to the tangent plane.    
+    // However, it makes no perceptible difference, since the skin LUT does not vary  
+    // much with curvature when N.L is large.   
     
     float curvature = curvTensor.x * GSquare(lightDirProj.x) +     
     2.0f * curvTensor.y * lightDirProj.x * lightDirProj.y +
