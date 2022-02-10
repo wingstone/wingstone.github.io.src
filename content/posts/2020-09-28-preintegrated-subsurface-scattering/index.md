@@ -103,15 +103,22 @@ $$
 
 > 需要注意的是，对于环境光的预积分计算仍需要使用球面假设；因为原文积分使用的zonal harmonics，只能使用redial diffusion profile；
 
-不同光照方向下的方向曲率可以通过曲率向量变换，如下所示：
+不同光照方向下的方向曲率可以通过曲率向量变换来计算，如下所示：
 
-![conversion](conversion.jpg)
-<center>曲率变换</center>
+$$
+K_I = I^T·II·I
+$$
 
-其中曲率张量的定义为：
+其中`$K_I$`表示在方向`$I$`上的曲率，`$II$`即为我们要求的2x2的曲率张量；在主方向上的曲率张量会变为为2x2的对角矩阵，为：
 
-![tensor](tensor.jpg)
-<center>曲率张量</center>
+$$
+K_I = [d_1,d_2]·\begin{bmatrix}
+k_1 & 0   \\\\
+0   & k_2 \\\\
+\end{bmatrix}·[d_1,d_2]^T
+$$
+
+其中`$[d_1,d_2]$`即为主方向坐标系的方向向量，`$k_1、k_2$`为主方向下的方向曲率；
 
 > 关于曲率张量的计算方法，详细细节需要参考论文[^6];
 
@@ -137,6 +144,159 @@ float CurvatureFromLight(    float3 tangent,    float3 bitangent,    float3 curv
     return curvature;
 }
 ```
+
+## Code Appendix
+
+### Lookup Textures
+
+```c++
+float Gaussian (float v, float r)
+{
+    return 1.0/sqrt(2.0*UNITY_PI*v)*exp(-(r*r)/(2*v));
+}
+
+float3 Scatter(float r)
+{
+    return Gaussian(0.0064*1.414, r)*float3(0.233,0.455,0.649)+
+    Gaussian(0.0484*1.414, r)*float3(0.100,0.336,0.344)+
+    Gaussian(0.1870*1.414, r)*float3(0.118,0.198,0.000)+
+    Gaussian(0.5670*1.414, r)*float3(0.113,0.007,0.007)+
+    Gaussian(1.9900*1.414, r)*float3(0.358,0.004,0.000)+
+    Gaussian(7.4100*1.414, r)*float3(0.078,0.000,0.000);
+}
+
+float3 integrateDiffuseScatteringOnRing(float cosTheta , float skinRadius)
+{
+    // Angle from lighting direction.
+    float theta = acos(cosTheta);
+    float3 totalWeights = 0;
+    float3 totalLight = 0;
+    float a= -UNITY_PI/2;
+    float inc = 0.001;
+
+    while(a <= UNITY_PI/2)
+    {
+        float sampleAngle = theta + a;
+        float diffuse= saturate(cos(sampleAngle));
+        float sampleDist = abs(2.0*skinRadius*sin(a*0.5));
+        // Distance.
+        float3 weights = Scatter(sampleDist);
+        // Profile Weight.
+        totalWeights += weights;
+        totalLight += diffuse*weights;
+        a+=inc;
+    }
+    return totalLight/totalWeights;
+}
+
+float newPenumbra(float pos)
+{
+    return saturate(pos*2-1);
+}
+
+//penumbraLocation为归一化后的在半影区域内的位置；
+float3 integrateShadowScattering(float penumbraLocation, float penumbraWidth)
+{
+    float3 totalWeights = 0;
+    float3 totalLight = 0;
+    float PROFILE_WIDTH = UNITY_PI*4;   //应该为测量数据，没找到资料，这里取个差不多的数值，在保证运行效率下尽量大
+    float inc = 0.001;
+
+    float a = -PROFILE_WIDTH;
+    while(a <= PROFILE_WIDTH)
+    {
+        float light = newPenumbra(penumbraLocation+a/penumbraWidth);
+        float sampleDist = abs(a);
+        float3 weights = Scatter(sampleDist);
+        totalWeights += weights;
+        totalLight += light*weights;
+        a+=inc;
+    }
+
+    return totalLight/totalWeights;
+}
+```
+
+### Simplified Skin Shader
+
+```c++
+//wrapndl:0-1
+//curvature:曲率
+//http://simonstechblog.blogspot.com/2015/02/pre-integrated-skin-shading.html
+float3 SimonInterpolate(float3 wrapndl, float curvature)
+{
+    float3 NdotL = wrapndl;
+    float curva = (1.0/mad(curvature, 0.5 - 0.0625, 0.0625) - 2.0) / (16.0 - 2.0); // curvature is within [0, 1] remap to normalized r from 2 to 16
+    float oneMinusCurva = 1.0 - curva;
+    float3 curve0;
+    {
+        float3 rangeMin = float3(0.0, 0.3, 0.3);
+        float3 rangeMax = float3(1.0, 0.7, 0.7);
+        float3 offset = float3(0.0, 0.06, 0.06);
+        float3 t = saturate( mad(NdotL, 1.0 / (rangeMax - rangeMin), (offset + rangeMin) / (rangeMin - rangeMax)  ) );
+        float3 lowerLine = (t * t) * float3(0.65, 0.5, 0.9);
+        lowerLine.r += 0.045;
+        lowerLine.b *= t.b;
+        float3 m = float3(1.75, 2.0, 1.97);
+        float3 upperLine = mad(NdotL, m, float3(0.99, 0.99, 0.99) -m );
+        upperLine = saturate(upperLine);
+        float3 lerpMin = float3(0.0, 0.35, 0.35);
+        float3 lerpMax = float3(1.0, 0.7 , 0.6 );
+        float3 lerpT = saturate( mad(NdotL, 1.0/(lerpMax-lerpMin), lerpMin/ (lerpMin - lerpMax) ));
+        curve0 = lerp(lowerLine, upperLine, lerpT * lerpT);
+    }
+    float3 curve1;
+    {
+        float3 m = float3(1.95, 2.0, 2.0);
+        float3 upperLine = mad( NdotL, m, float3(0.99, 0.99, 1.0) - m);
+        curve1 = saturate(upperLine);
+    }
+    float oneMinusCurva2 = oneMinusCurva * oneMinusCurva;
+    float3 brdf = lerp(curve0, curve1, mad(oneMinusCurva2, -1.0 * oneMinusCurva2, 1.0) );
+    return brdf;
+}
+
+float3 SkinDiffuse(float3 ndl, float curvature)
+{
+    float3 lookup = ndl*0.5+0.5;
+    float3 diffuse;
+    diffuse.r = tex2D(_PreIntegratedSkinTex, float2(lookup.r, curvature)).r;
+    diffuse.g = tex2D(_PreIntegratedSkinTex, float2(lookup.g, curvature)).g;
+    diffuse.b = tex2D(_PreIntegratedSkinTex, float2(lookup.b, curvature)).b;
+    return diffuse;
+}
+
+float3 SkinShadow(float atten, float width)
+{
+    return tex2D(_PreIntegratedShadowTex, float2(atten, width)).rgb;
+}
+
+// Simple curvature calculation.
+float dn = length(fwidth(oldN));
+float dp = length(fwidth(i.worldPos));
+float curvature = saturate(dn/dp*_TuneCurvature);
+
+// Specular / Diffuse Normals.
+float4 normMapHigh = tex2D(NormalSamplerHigh, Uv)*2.0 - 1.0;
+float4 normMapLow = tex2D(NormalSamplerLow, Uv)*2.0 - 1.0;
+float3 Nhigh = mul(normMapHigh.xyz, TangentToWorld);
+float3 Nlow = mul(normMapLow.xyz, TangentToWorld );
+float3 rS = Nhigh ;
+float3 rN = lerp(Nhigh, Nlow, tuneNormalBlur.r);
+float3 gN = lerp(Nhigh, Nlow, tuneNormalBlur.g);
+float3 bN = lerp(Nhigh, Nlow, tuneNormalBlur.b);
+
+// Diffuselighting
+float3 NdotL = float3(dot(rN,L), dot(gN,L), dot(bN,L));
+float3 diffuse = SkinDiffuse(curvature, NdotL) * LightColor * SkinShadow(atten, _TunePenumbraWidth);
+```
+
+### Calculate Directional Curvature
+
+[github trimesh2](https://github.com/Forceflow/trimesh2);
+[origin trimesh2](https://gfx.cs.princeton.edu/proj/trimesh2/);
+[curvature_estimation_Rusinkiewicz](https://github.com/aymanesouani/curvature_estimation_Rusinkiewicz
+);
 
 ## Reference
 
