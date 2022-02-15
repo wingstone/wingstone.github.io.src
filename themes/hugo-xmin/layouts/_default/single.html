@@ -4,6 +4,9 @@
     {{ with .Params.author }}
     <h3 class="author">{{ . }}</h3>{{ end }} {{ if (gt .Params.date 0) }}
     <h3 class="date">{{ .Date.Format "2006/01/02" }}</h3>{{ end }}
+    <div>
+        <span id="busuanzi_container_page_pv"> 阅读量 <span id="busuanzi_value_page_pv"></span> 次</span>
+    </div>
 </div>
 
 {{- partial "entry/toc.html" . }}
