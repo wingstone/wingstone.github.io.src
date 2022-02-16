@@ -120,7 +120,7 @@ $$
 
 其中`$[d_1,d_2]$`即为主方向坐标系的方向向量，`$k_1、k_2$`为主方向下的方向曲率；
 
-> 关于曲率张量的计算方法，详细细节需要参考论文[^6];
+> 关于曲率张量的计算方法，详细细节需要参考论文[^6]；更详细细节可以参考后面所提出来的开源代码；
 
 由于曲率张量为轴对称的，因此只需要记录三个参数，加上用来计算环境光需要的平均曲率，四个参数刚好可以存储到顶点的一个4byte属性中；
 
@@ -293,10 +293,7 @@ float3 diffuse = SkinDiffuse(curvature, NdotL) * LightColor * SkinShadow(atten, 
 
 ### Calculate Directional Curvature
 
-[github trimesh2](https://github.com/Forceflow/trimesh2);
-[origin trimesh2](https://gfx.cs.princeton.edu/proj/trimesh2/);
-[curvature_estimation_Rusinkiewicz](https://github.com/aymanesouani/curvature_estimation_Rusinkiewicz
-);
+代码量偏大，详细细节可参考论文作者的开源库[origin trimesh2](https://gfx.cs.princeton.edu/proj/trimesh2/)以及[github trimesh2](https://github.com/Forceflow/trimesh2);
 
 ## Reference
 
