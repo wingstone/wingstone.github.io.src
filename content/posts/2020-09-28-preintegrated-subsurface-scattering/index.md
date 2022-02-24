@@ -145,9 +145,14 @@ float CurvatureFromLight(    float3 tangent,    float3 bitangent,    float3 curv
 }
 ```
 
-## Code Appendix
+最终得到的运行时方向曲率计算结果为：
 
-### Lookup Textures
+![方向曲率结果](direction_curve.jpg)
+<center>方向曲率结果</center>
+
+## Appendix
+
+### Lookup Textures Shader
 
 ```c++
 float Gaussian (float v, float r)
@@ -294,6 +299,8 @@ float3 diffuse = SkinDiffuse(curvature, NdotL) * LightColor * SkinShadow(atten, 
 ### Calculate Directional Curvature
 
 代码量偏大，详细细节可参考论文作者的开源库[origin trimesh2](https://gfx.cs.princeton.edu/proj/trimesh2/)以及[github trimesh2](https://github.com/Forceflow/trimesh2);
+
+其中github trimesh2提供了编译好的lib文件，便于开发人员直接使用；与引擎比较好的一种结合方式（特别是Unity这种C#作为开发语言的引擎），是将其封装成dll文件，直接在引擎中调用来处理已有资产；
 
 ## Reference
 
