@@ -48,6 +48,7 @@ url = "index.xml"
 
 [Params]
 favicon = "icons/16.png"
+avatar = "img/avatar.png"
 description = "wingtone's blog website."
 footer = "&copy; [wingstone](https://wingstone.github.io) 2020 -- {Year} | [Github](https://github.com/wingstone) | [Zhihu](https://www.zhihu.com/people/wu-zhu-32-40) | [Shadertoy](https://www.shadertoy.com/user/wingstone)"
 enableGitalk = true
