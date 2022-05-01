@@ -2,7 +2,7 @@
 title: Home
 ---
 
-[<img src="img/avatar.png" style="max-width:15%;min-width:40px;float:right;" alt="Github repo" />](https://github.com/wingstone)
+[<img src="/img/avatar.png" style="max-width:15%;min-width:40px;float:right;" alt="Github repo" />](https://github.com/wingstone)
 
 # wingstone's blog
 
