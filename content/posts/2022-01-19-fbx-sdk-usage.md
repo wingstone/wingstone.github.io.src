@@ -18,7 +18,7 @@ coverMeta: out
 
 不同的fbx sdk版本，要配合不同的vs studio版本使用；sdk版本对应的VS studio版本在下载时会有显示，所有的fbx sdk版本下载点击[fbx sdk archives](https://www.autodesk.com/developer-network/platform-technologies/fbx-sdk-archives);
 
-## mesh的创建流程小结
+## Mesh的创建流程小结
 
 vertex与index的创建流程相对固定，如下：
 
@@ -74,6 +74,40 @@ MappingMode常用的为FbxGeometryElement::eByControlPoint与FbxGeometryElement:
 
 ReferenceMode常用的为FbxGeometryElement::eDirect与FbxGeometryElement::eIndexToDirect；以uv为例，若使用FbxGeometryElement::eDirect，则表示没有IndexArray，前面获取的索引可直接获取DirectArray；若使用FbxGeometryElement::eIndexToDirect，则表示有IndexArray，前面获取的索引是IndexArray的索引，从IndexArray获取的索引才可用来获取DirectArray;
 
+从实际使用来看，对于vertex color的创建，需要绑定到FbxLayer0上，才能有效的创建与修改，即：
+```c++
+// normal to color
+auto LayerZero = pMesh->GetLayer(0);
+FbxGeometryElementVertexColor* lVertexColorElement = pMesh->CreateElementVertexColor();
+lVertexColorElement->SetMappingMode(FbxGeometryElement::eByPolygonVertex);
+lVertexColorElement->SetReferenceMode(FbxGeometryElement::eIndexToDirect);
+
+lVertexColorElement->GetDirectArray().Resize(controlPointCount);
+for (size_t i = 0; i < controlPointCount; i++)
+{
+    lVertexColorElement->GetDirectArray().SetAt(i, normals[i]);
+}
+
+lVertexColorElement->GetIndexArray().Resize(indexCount);
+int currentIndex = 0;
+for (size_t i = 0; i < polygonCount; i++)
+{
+    int lPolygonSize = pMesh->GetPolygonSize(i);
+
+    for (size_t j = 0; j < lPolygonSize; j++)
+    {
+        int lControlPointIndex = pMesh->GetPolygonVertex(i, j);
+        lVertexColorElement->GetIndexArray().SetAt(currentIndex, lControlPointIndex);
+        currentIndex++;
+    }
+}
+
+LayerZero->SetVertexColors(lVertexColorElement);
+```
+
+## Mesh的读取与显示
+
+在fbx sdk中有大量的Sample，其中Sample中的ImportScene展示了如何完整显示fbx的所有信息；这里以显示一个mesh的uv信息为例：
 ```c++
 void LoadUVInformation(FbxMesh* pMesh)
 {
@@ -155,3 +189,5 @@ void LoadUVInformation(FbxMesh* pMesh)
     }
 }
 ```
+
+关于fbx sdk应用上的文章，可以阅读[Working with FBX SDK](https://www.cnblogs.com/clayman/archive/2010/12/11/1902782.html)；
