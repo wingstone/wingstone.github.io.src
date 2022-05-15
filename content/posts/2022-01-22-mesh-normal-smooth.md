@@ -10,7 +10,7 @@ metaAlignment: center
 coverMeta: out
 ---
 
-Unity计算平滑法线的简单功能实现；
+Unity平滑法线的一些实现方法；
 <!--more-->
 
 ## Version1
