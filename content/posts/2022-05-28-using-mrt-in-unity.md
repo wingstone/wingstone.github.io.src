@@ -115,3 +115,8 @@ Camera.main.AddCommandBuffer(CameraEvent.BeforeForwardOpaque, cmd);
 // Or execute command buffer manually
 Graphics.ExecuteCommandBuffer(cmd);
 ```
+
+
+## Reference
+
+1. [Multiple render target (MRT) questions for Unity Technologies](https://forum.unity.com/threads/multiple-render-target-mrt-questions-for-unity-technologies.262966/)
