@@ -51,25 +51,6 @@ RenderTexture.ReleaseTemporary(rt2);
 
 此方法只能在相机的绘制中，针对整个场景使用mrt，用法类似于Camera.targetTexture，设置一次即可；
 
-需要注意的是，使用了MRT后，很多其他的后期插件（比如官方的postprocess stack）都不兼容，主要问题是使用mrt导致官方后其中的BuiltinRenderTextureType.CameraTarget丢失，就算自己去写后期也有一定的兼容问题；
-
-比较好的做法是手动创建一个备用相机来渲染mrt，然后将备用相机合成结果blit到当前相机所用的CameraTarget上；
-
-或者手动创建一个RT作为finalRT，在相机渲染结束后，将mrt的结果合成到finalRT上，再将finalRT blit到屏幕上（通过绘制api或通过rawimage）；
-
-在unity的论坛上，官方提供了一个方法来解决这个问题，就是在OnPostRender中，将mrt的合成结果blit到屏幕上；方法为
-
-```C#
-void OnPostRender()
-{
-    Display screen1 = Display.displays[0];
-    Graphics.SetRenderTarget(screen1.colorBuffer, screen1.depthBuffer);
-
-    m_mrtCombine.SetTexture( "_target2", m_target2 );
-    Graphics.Blit( m_target1, null, m_mrtCombine );
-}
-```
-
 比较适用于buildin管线。
 
 使用方法为：
@@ -93,6 +74,25 @@ void Start()
     dRt.name = depthBufferName;
 
     cam.SetTargetBuffers (buffers, dRt.depthBuffer);
+}
+```
+
+需要注意的是，使用了MRT后，很多其他的后期插件（比如官方的postprocess stack）都不兼容，主要问题是使用mrt导致官方后其中的BuiltinRenderTextureType.CameraTarget丢失，就算自己去写后期也有一定的兼容问题；
+
+比较好的做法是手动创建一个备用相机来渲染mrt，然后将备用相机合成结果blit到当前相机所用的CameraTarget上；
+
+或者手动创建一个RT作为finalRT，在相机渲染结束后，将mrt的结果合成到finalRT上，再将finalRT blit到屏幕上（通过绘制api或通过rawimage）；
+
+在unity的论坛上，官方提供了一个方法来解决这个问题，就是在OnPostRender中，将mrt的合成结果blit到屏幕上；方法为
+
+```C#
+void OnPostRender()
+{
+    Display screen1 = Display.displays[0];
+    Graphics.SetRenderTarget(screen1.colorBuffer, screen1.depthBuffer);
+
+    m_mrtCombine.SetTexture( "_target2", m_target2 );
+    Graphics.Blit( m_target1, null, m_mrtCombine );
 }
 ```
 

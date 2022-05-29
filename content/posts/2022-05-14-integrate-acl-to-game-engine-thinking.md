@@ -16,7 +16,7 @@ coverMeta: out
 
 ## acl的使用方法
 
-acl的插件使用方法，在仓库中有非常完整的文档说明，并且有配套的博客来讲解背后的实现原理；
+acl插件[^1]的使用方法，在仓库中有非常完整的文档说明，并且有配套的博客[^2]来讲解背后的实现原理；
 
 ### acl的验证
 
@@ -30,7 +30,7 @@ acl的插件使用方法，在仓库中有非常完整的文档说明，并且�
 
 如果完成了acl的验证过程，基本上对acl的集成有了充分的认识，那么集成acl就相对简单点；
 
-比较好的集成方式，是参考[acl-ue4-plugin](https://github.com/nfrechette/acl-ue4-plugin)的实现，整个结构非常清晰与完整，对引擎不会有太大改动；
+比较好的集成方式，是参考acl-ue4-plugin[^3]的实现，整个结构非常清晰与完整，对引擎不会有太大改动；
 
 整个集成过程可分为三步：
 
@@ -62,8 +62,33 @@ acl厉害的一点是采用了更加合理地误差计算（考虑了误差沿�
 
 acl关于骨骼动画压缩着一块，基本上只能适用于骨骼动画；但是acl还提供了标量数据的压缩，标量数据的压缩显得更加的通用，只要提供合适的误差算法，使用acl进行标量数据的压缩也是一步很大的优化；事实上，acl-ue4-plugin里所提供的关于blendshape动画的压缩，就是采用acl标量数据的压缩方法；
 
+## acl的bit位数选择策略
+
+acl对clip切分后，针对每个track conponent来计算其应需要的压缩bit数；由于track conponent数量过多，采用穷举的方法来选取bit数显得耗时过高而不可取；acl采取启发式的算法来选取，不期望全局最优，但是在可接受的误差范围，并且压缩耗时会大大降低[^4]；
+
+acl设置了16中可选的bit位数，0, 3, 4, …, 16, and 23；从而减少了搜索范围；
+
+### Initial State
+
+为了保证最高精度，acl会将每个track的bit位数初始化为最高的位数23bit；
+
+### First Phase
+
+第一阶段为了能够加快搜索速度，acl会对每一个track都进行固定bit位数的下降，知道恰好不超过设定的误差范围；不过根部节点除外，因为根部节点，比如相机节点，一般都会有非常高的精度要求，如果对其进行处理，反而会引入更大其他误差；
+
+比如相机的旋转，如果我们对其进行不合适量化，离相机越远就会引入更大误差；
+
+### Second Phase
+
+第二阶段为了能够精确计算结果，会针对所有的track进行迭代，来尽可能降低每个track的bit位数，直到误差恰好满足设定的要求；
+
+这个过程中，遍历track的顺序非常重要，从根节点向叶节点遍历，与从叶节点向根节点遍历，产生的bit位数分布会有相当多不同；从叶节点向根节点遍历，叶节点会使用更低的bit位数，由于叶节点相比根节点会多很多，这样对减少内存会起更大作用；同样由于叶节点使用较低bit位数，父节点因而会保持较高的bit位数，来保证误差满足设定的要求；
+
+acl的作者进行了测试，相比从根节点向叶节点遍历，从叶节点向根节点遍历会减少2%内存，并且不会产生任何精度、加压缩时间的问题；
+
 ## Reference
 
-1. [acl](https://github.com/nfrechette/acl)
-2. [acl-ue4-plugin](https://github.com/nfrechette/acl-ue4-plugin)
-3. [Animation Compression: Table of Contents](https://nfrechette.github.io/2016/10/21/anim_compression_toc/)
+[^1]: [acl](https://github.com/nfrechette/acl)
+[^3]: [Animation Compression: Table of Contents](https://nfrechette.github.io/2016/10/21/anim_compression_toc/)
+[^2]: [acl-ue4-plugin](https://github.com/nfrechette/acl-ue4-plugin)
+[^4]: [Animation Compression: Advanced Quantization](https://nfrechette.github.io/2017/03/12/anim_compression_advanced_quantization/)
