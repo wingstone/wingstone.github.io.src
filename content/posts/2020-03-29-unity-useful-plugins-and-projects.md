@@ -29,17 +29,11 @@ tags:
 13. [2D Game Kit](https://assetstore.unity.com/packages/essentials/tutorial-projects/2d-game-kit-107098),Unity官方提供的2D游戏开发包，里面介绍了很多2D组件的使用；
 14. [unity-text-typer](https://github.com/redbluegames/unity-text-typer)，一个TextTyper，用来逐字打印字体，并且提供了多种字体动画；在很多红白机游戏、ACG Game、以及UI字体的显示都会用到这种功能，需要先安装Text Mesh Pro；
 15. [Mesh To File - Obj, Fbx ASCII](https://assetstore.unity.com/packages/tools/utilities/mesh-to-file-obj-fbx-ascii-135071)，免费的文件格式转换工具，提供了从Unity mesh转换为obj、fbx文件的功能；
-16. [ucontext basic](https://assetstore.unity.com/packages/tools/level-design/ucontext-basic-182221)，一个All in one版的常用插件合集，主要是一些小功能的整理，便于高效使用Unity；
-17. [simple-dialogues](https://assetstore.unity.com/packages/tools/level-design/simple-dialogues-98640)，简易版对话系统；同类插件还有[VIDE Dialogues](https://assetstore.unity.com/packages/tools/ai/vide-dialogues-69932)；
-18. [blockout](https://assetstore.unity.com/packages/tools/level-design/blockout-100388)，非常完善的关卡原型搭建系统，能使你的关卡设计效率大大提升；
-19. [UModeler Lite](https://assetstore.unity.com/packages/tools/modeling/umodeler-lite-133081)，Unity引擎下开发的建模工具；
-20. [Realtime CSG](https://assetstore.unity.com/packages/tools/modeling/realtime-csg-69542)，基于CSG的关卡设计工具，非常的高效，能充分利用CSG的精确性；同类插件还有[SabreCSG Level Design Tools](https://assetstore.unity.com/packages/tools/modeling/sabrecsg-level-design-tools-47418);
-21. [Deform](https://assetstore.unity.com/packages/tools/modeling/deform-148425)Unity下的网格变形工具，功能支持非常完善；同类插件还有[Mesh and Object Deformers for Unity 3D](https://assetstore.unity.com/packages/tools/modeling/mesh-and-object-deformers-for-unity-3d-81427)；
-22. [Nanolod | Automatic LODs](https://assetstore.unity.com/packages/tools/modeling/nanolod-automatic-lods-193314)LOD自动生成工具，与Unity非常契合，减面算法如何，要依据试验来判定；
-23. [UVee](https://assetstore.unity.com/packages/tools/modeling/uvee-6933)Unity下的模型UV编辑与查看工具；
-24. [Vector Swizzle](https://assetstore.unity.com/packages/tools/modeling/vector-swizzle-185541)Unity下Vector的Swizzle支持；
-25. [hexaSurface](https://assetstore.unity.com/packages/tools/modeling/hexasurface-41179)Unity下六边形解决方案的支持；
-26. [Mesh Debugger](https://assetstore.unity.com/packages/tools/modeling/mesh-debugger-90350)Unity下非常完善的Mesh debug工具；
+16. [Realtime CSG](https://assetstore.unity.com/packages/tools/modeling/realtime-csg-69542)，基于CSG的关卡设计工具，非常的高效，能充分利用CSG的精确性；同类插件还有[SabreCSG Level Design Tools](https://assetstore.unity.com/packages/tools/modeling/sabrecsg-level-design-tools-47418);
+17. [Find Reference 2](https://assetstore.unity.com/packages/tools/utilities/find-reference-2-59092)，Unity项目中定位reference的超好用插件，可以轻松定位资源之间的引用关系；
+18. [Bookmark Everything](https://assetstore.unity.com/packages/tools/utilities/bookmark-everything-134467)，Unity免费书签插件，用于标记资源（包括文件夹），从而可以快速调到资源处；
+19. [simple-dialogues](https://assetstore.unity.com/packages/tools/level-design/simple-dialogues-98640)，简易版对话系统；同类插件还有[VIDE Dialogues](https://assetstore.unity.com/packages/tools/ai/vide-dialogues-69932)；
+20. [Hdg Remote Debug - Live Update Tool](https://assetstore.unity.com/packages/tools/utilities/hdg-remote-debug-live-update-tool-61863)，远程真机debug工具，便于真机运行时调试场景中的物体，可以快速定位性能、显示等个方面有问题的物体；
 
 ## Package List
 
