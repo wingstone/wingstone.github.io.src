@@ -61,6 +61,13 @@ alpha-test这个东西，他对depth的写入是不能预先确定的，它必�
 
 而实际在项目使用中，MSAA仍是非常耗时的，因为对于depth需要多倍的binning及bin buffer，以及对应的内存；alpha blend也没那么高效，因为仍然会增加多倍的overdraw；alpha test消耗可能也没那么高，因为还有fragment层面的early-z存在，以及在PS中提前discard，还可以减少余下ps所带来的开销；
 
+## 高通特有的特性
+
+这一部分的更多细节可以直接参考高通的文档[Game Developer Guides](https://developer.qualcomm.com/sites/default/files/docs/adreno-gpu/developer-guide/index.html)；
+
+1. FlexRender™ technology (Hybrid Deferred and Direct Rendering mode)：高通所单独开发的特性，可以支持tbdr与imr模式的混合使用，从而兼顾两者的优点；如果使用snapdragon profiler来分析unity在高通芯片上渲染的一帧，就能发现在场景渲染阶段，高通使用tbdr来渲染，在后处理阶段，高通使用imr来渲染，从而使得功耗及效率达到最优；
+2. Low Resolution Z pass：此功能在Adreno 5X (A5X)处理器上加入，并且该功能是与渲染顺序无关的功能；该功能可以在binning pass阶段来构建低分辨率下的depth buffer，随后在rendering pass使用LRZ来进行高效且与与顺序无关的depth rejection；更详细解释可参考[Low Resolution Z Buffer support on Turnip](https://blogs.igalia.com/siglesias/2021/04/19/low-resolution-z-buffer-support-on-turnip/)；
+
 ## Reference
 
 1. [MOBILE GRAPHICS 101](https://community.arm.com/arm-community-blogs/b/graphics-gaming-and-vr-blog/posts/moving-mobile-graphics)
