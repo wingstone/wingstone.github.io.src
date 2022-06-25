@@ -8,7 +8,7 @@ tags:
 - Mobile
 - GPU
 ---
-移动GPU架构经常被称之为TBR（Tiled Based Rendering），我们这里也以TBR代称；
+移动GPU架构经常被称之为TBR（Tiled Based Rendering），我们这里也以TBR代称，有时也会称之为TBDR；
 <!--more-->
 
 ## 移动TBR架构与桌面IMR架构
@@ -41,13 +41,16 @@ TBR的思想是将将屏幕划分成tile，然后即可在GPU上的low-latency m
 
 ### 关于early-z
 
-#### Forward pixel kill
-
-这是我们平时最常了解到的early-z应用形式，在PC上也能看到；是一种在fragment层面上的提前深度测试剔除，即在光栅化后，shading之前进行z的测试，可以节省PS的开销；此项为硬件层优化，无法介入；
+这是我们平时最常了解到的early-z应用形式，是一种在fragment层面上的提前深度测试剔除，即在光栅化后，shading之前进行z的测试，可以节省PS及后续的开销；如果发生discard等更改depth的操作，则会导致early-z的失效，转而启动late-z；并且由于early-z的使用，一般针对不透明物体会使用从前到后的方式来进行渲染；
 
 #### Hidden surface removal
 
-这是triangle层面上的剔除，执行时间在光栅化之前，若剔除成功就不会执行光栅化及其之后所有的渲染流程，属于比较高效率的优化；此项为硬件层优化，无法介入；
+early-z的引入虽然提升了效率，但同时对不透明物体每帧进行排序则会增加CPU的负担，因此出现了硬件层面的[Hidden surface removal](https://en.wikipedia.org/wiki/Hidden-surface_determination)，不过此块不同的GPU目前看来实现各不相同；
+
+比如PowerVR直接以Hidden Surface Removal (HSR)来命名其技术，可以在硬件层面直接避免逐像素overdraw的发生，会在early-z阶段使用hsr直接渲染能看到的像素，可参考[
+Tile-Based Deferred Rendering (TBDR)](https://docs.imgtec.com/Architecture_Guides/PowerVR_Architecture/topics/powervr_architecture_tile_based_deferred_rendering__tbdr.html?hl=hidden%2Csurface%2Cremoval)；
+
+而arm则从Midgard GPU架构开始，则引入了Forward Pixel Kill (FPK)的hsr技术，此技术同样可以停止被遮挡且不会对输出有贡献的片段的渲染，即使改片段已通过early-z的测试；具体可参考[Midgard Tripipe Execution Core](https://developer.arm.com/documentation/102560/0100/Midgard-Tripipe-Execution-Core?lang=en)；
 
 ### 关于blending、MSAA、alpha-test
 
@@ -64,7 +67,7 @@ alpha-test这个东西，他对depth的写入是不能预先确定的，它必�
 1. FlexRender™ technology (Hybrid Deferred and Direct Rendering mode)：高通所单独开发的特性，可以支持tbr与imr模式的混合使用，从而兼顾两者的优点；如果使用snapdragon profiler来分析unity在高通芯片上渲染的一帧，就能发现在场景渲染阶段，高通使用tbr来渲染，在后处理阶段，高通使用imr来渲染，从而使得功耗及效率达到最优；
 2. Low Resolution Z pass：此功能在Adreno 5X (A5X)处理器上加入，并且该功能是与渲染顺序无关的功能；该功能可以在binning pass阶段来构建低分辨率下的depth buffer，随后在rendering pass使用LRZ来进行高效且与与顺序无关的depth rejection；更详细解释可参考[Low Resolution Z Buffer support on Turnip](https://blogs.igalia.com/siglesias/2021/04/19/low-resolution-z-buffer-support-on-turnip/)；
 
-## mali特有的特性
+## mali的特性
 
 在arm的开发者文档上能了解到更多的内容[mali GPU Architectures](https://developer.arm.com/Architectures#aq=%40navigationhierarchiescategories%3D%3D%22Architecture%20products%22%20AND%20%40navigationhierarchiescontenttype%3D%3D%22Product%20Information%22&numberOfResults=48&f[navigationhierarchiesprocessortype]=GPU%20Architectures)；整个mali gpu家族对应的型号、特性、架构可以在[About the Mali GPU hardware families](https://developer.arm.com/documentation/100587/1-1/The-Mali-GPU-Hardware-Families/About-the-Mali-GPU-hardware-families?lang=en)了解到；
 
@@ -73,6 +76,9 @@ alpha-test这个东西，他对depth的写入是不能预先确定的，它必�
 2. 算法优势，TBR的使用，是的很多高带宽的算法得以高效实现（因为tile的带宽优势），如MSAA与MRT；对于MSAA来说，在从tile写入system mem的过程中即可完成resolve的操作；对于MRT，在defer lighting时读取frame buffer可以受益（看原文的意思，应该是因为以tile的形式读取导致的）；
 3. 由于tbr算法特性，必须要存储geometry的输出（per vertex data）与tile intermediate  state至system mem，因此在geometry pass与fragment pass之间会产生额外开销，必须要在此额外开销与tbr所带来的的带宽优势取得平衡，才能带来受益；例如tessellation技术就是完全为imr架构所设计的，在imr架构中会将额外的geometry data存至 on-chip FIFO buffer，而不是system mem；
 
+## powervr的特性
+
+更多资料参考[POWERVR GRAPHICS ARCHITECTURES](https://www.imaginationtech.com/products/gpu/graphics-architecture/);
 
 ## Reference
 
