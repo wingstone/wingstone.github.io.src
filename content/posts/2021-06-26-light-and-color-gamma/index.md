@@ -103,13 +103,18 @@ gamma空间下的blend则会引起色相偏移问题（插值、叠加或其他b
 
 ropping现象则是因为没有经过gamma correction引起的直线弯曲效应；不过需要在使用msaa或者ssaa的情况下才能看到，上图就是开8xaa情况下出现的问题；
 
+## gamma所带来的的优势
+
+1. CRT所使用的的非线性变换，刚好为人眼感知的逆向；这使得CRT的响应在人眼的视觉感知上为线性的；这种特性是高度需要的；
+2. Gamma correction的使用不仅是为了补偿CRT自身所带来的非线性变换，更重要的是，人眼对暗部区域的感知比亮部更加敏感，使用gamma空间来进行文件存储，可以大量减少存储所实际需要的精度；
+
 ## 总结
 
 本文主要介绍了图形学中gamma的由来，以及图形开发中与gamma相关的场景；开发者们需要注意gamma的存在，并通过正确的线性工作流来避免gamma引起显示不正确问题；
 
 ## references
 
-[^1]: [gamma faq](http://poynton.ca/notes/colour_and_gamma/gammafaq.html)
+[^1]: [gamma faq](http://poynton.ca/notes/colour_and_gamma/GammaFAQ.html)
 [^2]: [what are color spaces, color profiles and gamma correction?](https://www.wigglepixel.nl/en/blog/what-are-color-spaces-color-profiles-and-gamma-correction)
 [^3]: [realtimerendering](http://www.realtimerendering.com/)
 [^4]: [linear or gamma workflow](https://docs.unity3d.com/manual/linearrendering-linearorgammaworkflow.html#:~:text=linear%20or%20gamma%20workflow%20the%20unity%20editor%20offers,of%20a%20mesh%20to%20give%20it%20visual%20detail.)

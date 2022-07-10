@@ -42,7 +42,7 @@ irradiance volumes的理论其实并不难，只是将IBL的思想扩充到局�
 
 ![gradients for interpolation](gradients-for-interpolation.png)
 
-文章中使用point+gradient来构建cubic patches的方法来进行插值，从而解决这个问题，具体代码可以看D3D9SDK中的示例；
+文章中使用point+gradient来构建cubic patches的方法来进行插值，从而解决这个问题，具体论文可参考[Spherical Harmonic Gradients for Mid-Range Illumination](https://jankautz.com/publications/gradientSH_RS04.pdf)；
 
 ### Self Occlusion
 
