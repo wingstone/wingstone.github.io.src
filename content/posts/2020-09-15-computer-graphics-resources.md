@@ -26,3 +26,7 @@ tags:
 7. [Raster Tek](http://www.rastertek.com/tutindex.html)：一个关于DirectX入门的学习资料，对于新手非常推荐；相比于龙书，这个更接近与实际引擎开发，多个渲染功能都集成到一起；
 8. [d3dcoder](http://www.d3dcoder.net/)：这是龙书系列的官方网站，含有从DirectX9到DirectX12的教程源代码。
 9. [learnopengl](https://learnopengl.com/)：OpenGL的入门级必读教程。
+
+## 物理模拟
+
+1. [Physics-Based Animation](https://www.physicsbasedanimation.com/)
