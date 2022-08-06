@@ -101,7 +101,7 @@ $$
 
 最终的渲染结果为：
 
-![预积分渲染结果](result.jpg)
+![预积分渲染结果](result.png)
 <center>预积分渲染结果</center>
 
 ## extended preintegrated subsurface scattering
@@ -165,7 +165,7 @@ float CurvatureFromLight(    float3 tangent,    float3 bitangent,    float3 curv
 
 最终得到的运行时方向曲率计算结果为：
 
-![方向曲率结果](direction_curve.jpg)
+![方向曲率结果](direction_curve.png)
 <center>方向曲率结果</center>
 
 ### indirect light lut
