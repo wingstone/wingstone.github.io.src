@@ -182,6 +182,28 @@ $$
 
 由于常见非金属的F0范围为2%-5%，因此在工程中，经常去0.04来作为非金属的F0；
 
+#### Normal Distribution Function
+
+NDF定义了微表面法线m在几何平面上的统计概率密度分布；基于微表面模型的NDF是有一定约束标准的，具体可参考[understanding_masking_shadowing](https://hal.inria.fr/hal-00942452v1/document)以及[masking_shadowing_slides](https://blog.selfshadow.com/publications/s2014-shading-course/heitz/s2014_pbs_masking_shadowing_slides.pdf)，标准为：
+
+$$
+\int( \omega _ {m} \cdot \omega g)D( \omega _ {m} )d \omega _ {m} = 1
+$$
+
+这里的积分范围为整个球部方向（以球部法线代替所有微法线可能范围）；公式所代表的含义为，所以角度的微表面在几何平面所投影的面积为单位面积1；D的单位为1/steradians，因此`$( \omega _ {m} \cdot \omega g)D( \omega _ {m} )d \omega _ {m}$`是无量纲的量，具体参考[Microfacet Models for Refraction through Rough Surfaces](http://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.html)
+
+满足归一化条件的NDF有normalized blin phong、ggx、beckmann；blin-phong与beckmann分布比较接近，但是blin-phong是由经验模型演化而来，且其roughness的取值并不位于0-1范围，虽然可以通过其他手段来使其归一化；
+ggx与另外两者相比，其lobe更加窄，且可以提供更加长的tail，除了可以应用于反射，还可用于折射计算，另外Desney[pbs_disney_brdf](https://blog.selfshadow.com/publications/s2012-shading-course/burley/s2012_pbs_disney_brdf_notes_v3.pdf)还引入了perceptional roughness来更好体现参数与表现之间的关系；
+
+#### shadow mask function
+
+与NDF一样，基于微表面模型的G函数也是有约束标准的；标准如下：
+
+$$
+\int G_ {1} ( \omega _ {o} , \omega _ {m} )( \omega _ {0} \cdot \omega _ {m} ) D( \omega _ {m} )d \omega _ {m} = \cos \theta _ {o}
+$$
+
+其代表微表面在o方向的投影面积应该为`$\cos \theta _ {o}$`；实时上除了上述约束标准，还有其他的约束标准需要去遵守；目前只有smith与v-cavity两个函数可以满足标准，且从实际试验数据来看，smith函数更接近真实数据；
 
 ## Reference
 
