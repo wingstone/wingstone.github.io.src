@@ -164,7 +164,7 @@ $$
 
 ### Mie scattering
 
-Mie scattering与Rayleigh scattering的性质比较类似，只是Mie scattering是由空气中的粒子引起的散射，粒子半径远大于波长；Mie scattering是城市中经常看到的灰色雾霾现象的主要原因；
+Mie scattering与Rayleigh scattering的性质比较类似，只是Mie scattering是由空气中的粒子引起的散射，粒子半径远大于波长；Mie scattering是城市中经常看到的灰色雾霾现象的主要原因，太阳周围的halo也是由Mie scattering引起的；
 
 ![mie](mie.png)
 
@@ -186,7 +186,7 @@ $$
 P_M(\mu)=\frac{3}{8\pi}\frac{(1-g^2)(1+\mu^2)}{(2+g^2)(1+g^2-2g\mu)^{\frac{3}{2}}}
 $$
 
-其中，$\mu$为入射方向与初设方向之间的夹角；g表示该介质的各项异性程度，常用g=0.76来表示；这里的相函数跟HG模型比较类似，具体可参考[Phase Functions](https://pbr-book.org/3ed-2018/Volume_Scattering/Phase_Functions)；
+其中，$\mu$为入射方向与初设方向之间的夹角；g表示该介质的各项异性程度，常用g=0.76来表示；由于Mie是各向异性的，是的Mie scattering具有很强的方向性；这里的相函数跟HG模型比较类似，具体可参考[Phase Functions](https://pbr-book.org/3ed-2018/Volume_Scattering/Phase_Functions)；
 
 ### Single scattering
 
