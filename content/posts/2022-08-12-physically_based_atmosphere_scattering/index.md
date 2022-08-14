@@ -109,7 +109,7 @@ $$
 L_s (p, w) = L_e (p, w) + \sigma_s (p, w) \int _ {S^2} {P(p,w_i,w)L_i(p,w_i)} dw_i
 $$
 
-in-scattering本质上还是由scattering所引起的，因此这里还是需要考虑$\sigma_s (p, w)$所带来的能量在路径$dt$上的积累；
+in-scattering本质上还是由out-scattering所引起的，因此这里实际上为，$w_i$方向的$L_i(p,w_i)$在当前位置损失的能量$\sigma_s (p, w)L_i(p,w_i)$，再乘以当前方向的相函数，即为$w_i$方向沿当前方向$w$的in-scattering，即 $\sigma_s (p, w) {P(p,w_i,w)L_i(p,w_i)}$；之后再沿球面方向进行积分即为上式；
 
 ## Atmospheric Scattering
 
@@ -245,6 +245,26 @@ SkyColor(P_c) = \sum_{P_c}^{P_a} T(P_c, X) * Sun \: Intensity * P(V,L) * T(X,P_s
 $$
 
 以上就是未优化情况下，最终的积分公式；
+
+其中的$T(P_c, X) * T(X,P_s)$由于是指数函数相乘，因此这里可以进行合并，合并后的结果为：
+
+$$
+T(P_c, P_s)=exp(-\beta_e(0) \left( \sum_{P_c}^{X} exp(-\frac{h}{H})ds + \sum_{X}^{P_s} exp(-\frac{h}{H})ds \right) )
+$$
+
+另外，由于要分别考虑Rayleigh scattering与Mie scattering，但是针对in-scattering与attention，两者的结合方式是不同的，这前面介绍in-scattering与attention所建立的模型有关；直接说结论，针对in-scattering，两种散射的贡献是相加的关系，即
+
+$$
+SkyColor(P_c) = SkyColor_R(P_c) + SkyColor_M(P_c) 
+$$
+
+针对attention（out-scattering与absorption），两者散射的贡献是相乘的，即
+
+$$
+T(P_a,P_b)=T_R(P_a,P_b)*T_M(P_a,P_b)
+$$
+
+将上面两式带入前面的积分公式，就能得到考虑Rayleigh scattering与Mie scattering时，应该真正计算的过程；
 
 ### Aerial Perspective
 
