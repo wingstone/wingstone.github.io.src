@@ -3,7 +3,7 @@ title: '基于srp开发csm心得'
 author: wingstone
 date: 2022-08-11
 categories:
-- contents
+- shadow
 metaAlignment: center
 coverMeta: out
 ---
