@@ -59,3 +59,10 @@ tonemapping后的颜色为:
 实际上E点之前这一部分区域常被称之为Toe，在[unreal](https://docs.unrealengine.com/4.27/en-US/RenderingAndGraphics/PostProcessEffects/ColorGrading/)以及[Hable curve](http://filmicworlds.com/blog/filmic-tonemapping-with-piecewise-power-curves/)都会使用一个单独的参数来控制区域的范围，从而使得暗部区域的对比度有更好的控制；该范围越大，暗部越实，暗部对比度越高；
 
 总结；前面所提的到的暗部提亮过程，实际上只是tonemapping所提供功能的一小部分，不能涵盖tonemapping对暗部的所有控制；在曲线E点之前，tonemapping甚至会压暗本来就比较暗的区域；
+
+-----
+分割线
+
+[hue shift](https://zhuanlan.zhihu.com/p/356435019)也是tonemapping分常重要的一个特征，能很好的体现高亮度的区域的颜色对比；
+
+关于tonemapping的更全面介绍，可参考[Tone Mapping](https://www.cl.cam.ac.uk/~rkm38/pdfs/tone_mapping.pdf)(待阅读)
