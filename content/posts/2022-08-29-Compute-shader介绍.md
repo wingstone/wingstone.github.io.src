@@ -23,3 +23,5 @@ Gpu在做线程组切换时，涉及到状态的更新，会导致Compute unit�
 async cs提供异步执行Compute shader的能力，可以在线程组切换的时候插入其他的线程的能力。从而提高gpu的利用率。
 一般来说，在任务比较重的graphic queue中插入轻量的compute queue与copy queue能更好地减小gpu latency。
 相关文章可参考[Async shader](https://developer.amd.com/wordpress/media/2012/10/Asynchronous-Shaders-White-Paper-FINAL.pdf)
+
+另外shadowmap pass与predepth pass是两个很好的执行async compute shader的时机，因为这两隔pass都是属于compute unit消耗很少的pass，大部分的运行瓶颈在rop操作上，因此使用async compute shader可以充分利用compute unit；
