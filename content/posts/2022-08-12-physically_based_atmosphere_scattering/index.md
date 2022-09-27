@@ -162,7 +162,7 @@ $$
 P_R(\mu)=\frac{3}{16\pi}(1+\mu^2)
 $$
 
-其中，`$\mu$`为入射方向与初设方向之间的夹角；
+其中，`$\mu$`为入射方向与出射方向之间的夹角；
 
 
 ### Mie scattering
@@ -230,7 +230,7 @@ $$
 在X点（ray matching的步进段）考虑in scattering，X点在V方向的能量为：
 
 $$
-SkyColor_V(x)=T(P_a,P_b)*SunIntensity*P(V,L)*\beta_S(h)*ds
+SkyColor_V(x) = T(P_a,P_b) * SunIntensity * P(V,L) * \beta_S(h) ds
 $$
 
 其中`$P(V,L)$`为相函数，`$\beta_S(h)$`为X点的scattering coefficient，`$ds$`为raymatching的长度；
