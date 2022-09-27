@@ -1,19 +1,18 @@
 ---
-title: 'unreal多线程渲染同步'
+title: 'multithread rendering in unreal'
 author: wingstone
-date: 2022-07-14
+date: 2022-09-26
 categories:
 - contents
 metaAlignment: center
 coverMeta: out
-draft: true
 ---
 
-unreal多线程渲染同步
+记录unreal引擎中的多线程渲染框架下的同步问题
 
 <!--more-->
 
-### Game Thread向Rendering Thread传递指令
+## Game Thread向Rendering Thread传递指令
 
 通过RenderingThread.h中的`ENQUEUE_RENDER_COMMAND`宏来进行指令传递；
 
@@ -105,7 +104,7 @@ static ENamedThreads::Type GetDesiredThread()
 
 到此，`ENamedThreads::GetRenderThread()`便指示出了我们最终要分发的线程为rendering thread；
 
-### Game Thread与Rendering Thread同步
+## Game Thread与Rendering Thread同步
 
 直接参考前人的总结[UE4主线程与渲染线程同步](https://zhuanlan.zhihu.com/p/80676205)；同步位置在Tick函数的以下部分：
 
@@ -196,7 +195,7 @@ void FRenderCommandFence::Wait(bool bProcessGameThreadTasks) const
 
 可以看到GameThread会通过GameThreadWaitForTask函数来等待之前（隔帧或者当前帧）创建的FNullGraphTask任务完成，若FNullGraphTask任务完成了，则之前RenderingThread队列中的任务也都完成了；也就完成了Game Thread与Rendering Thread的同步；
 
-### Rendering Thread向RHI Thread传递指令
+## Rendering Thread向RHI Thread传递指令
 
 在RHICommandList.h中封装了大量可以在RenderingThread中可以调用的api，以其中的以下代码为例：
 
@@ -333,7 +332,7 @@ FORCEINLINE_DEBUGGABLE void FRHICommandListImmediate::ImmediateFlush(EImmediateF
 
 `ImmediateFlush`在RenderingThread线程的多处都有调用，至此就完成了RHICommand指令的分发；
 
-### Game Thread与RHI Thread同步
+## Game Thread与RHI Thread同步
 
 unreal中Game Thread、Rendering Thread以及RHI Thread之间的同步策略是可选的，在RenderingThread.cpp文件中有以下代码
 
