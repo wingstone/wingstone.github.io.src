@@ -56,7 +56,9 @@ svt的一个简易实现可参考[VirtualTexture](https://github.com/jintiao/Vir
 
 Svt直接首先将texture进行划分成page，所有的mip都需要划分为page，所有的page大小都是一致的；
 
-**feedback环节**：运行时，首先跟进屏幕上地形的的uv，与ddx、ddy来确定需要使用哪些page（uv整除来确定page）及对应mip（ddx、ddy来确定mip）；随后将内存中为加载的page进行加载；ddx、ddy的确定需要额外的pass来计算，可以使用低分辨率的rt；这一步，也可以使用基于clipmap的思想，直接根据相机位置，来确定需要哪些page及对应mip，不需要额外pass；feedback的数据甚至可以理想烘焙；
+**feedback环节**：运行时，首先跟进屏幕上地形的的uv，与ddx、ddy来确定需要使用哪些page（uv整除来确定page）及对应mip（ddx、ddy来确定mip）；随后将内存中为加载的page进行加载；ddx、ddy的确定需要额外的pass来计算，可以使用低分辨率的rt；这一步，也可以使用基于clipmap的思想，直接根据相机位置，来确定需要哪些page及对应mip，不需要额外pass；feedback的数据甚至可以离线烘焙；
+
+> feedback环节需要从GPU读取屏幕page数据至CPU进行处理，这是一个效率非常低的操作，因为此操作会导致CPU挂机等待GPU任务完成，然后再进行真正的回读操作，会产生比较严重的stall问题，特别针对multi thread rending模式；解决这一问题的方式是使用async回读机制，进行隔帧读取，虽然隔帧读取增加了lantency，但是解决了stall问题，对lantency依赖不深的功能可以使用这种方法；参考[Why is GPU-CPU transfer slow?](https://community.khronos.org/t/why-is-gpu-cpu-transfer-slow/58708)、[AsyncCaptureTest](https://github.com/keijiro/AsyncCaptureTest)
 
 **vt更新环节**：根据加载的内容，以及page的位置及mip，**更新**page table以及physical texture；一般情况下，page table中的一个texel对应了一个page的位置，而page一般采用四四方方的划分方法，因此page table常采用四叉树的形式（即开启mip的texture）来存储physical page的位置（一般存储的信息为page在physical texture中的offset，以及mip）；
 

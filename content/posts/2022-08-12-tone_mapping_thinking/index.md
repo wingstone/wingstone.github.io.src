@@ -12,6 +12,8 @@ coverMeta: out
 
 <!--more-->
 
+## tonemapping曲线
+
 一般认为tonemapping是为了能让颜色从HDR空间更好的映射到LDR空间；主要体现在两个方面：
 
 1. 让暗部变亮；
@@ -60,9 +62,30 @@ tonemapping后的颜色为:
 
 总结；前面所提的到的暗部提亮过程，实际上只是tonemapping所提供功能的一小部分，不能涵盖tonemapping对暗部的所有控制；在曲线E点之前，tonemapping甚至会压暗本来就比较暗的区域；
 
------
-分割线
+## hue shift
 
 [hue shift](https://zhuanlan.zhihu.com/p/356435019)也是tonemapping分常重要的一个特征，能很好的体现高亮度的区域的颜色对比；
+
+下图为经过bloom后，未进行tonemapping的结果：
+
+![](bloom.png)
+
+其对应的hue为：
+
+![](hue_untone.png)
+
+经过aces tonemapping后的结果为：
+
+![](bloom_tone.png)
+
+其对应的hue为：
+
+![](hue_tone.png)
+
+可以很明显的看到，对于亮度较高的颜色值，tonemapping后，对应的hue会发生更大的偏移；
+
+当输出设备是hdr设备时，所使用的tonemapping（scene hdr -> screen hdr）会导致hue shift效果丢失，如amd所提供的[LPM](https://github.com/GPUOpen-Effects/FidelityFX-LPM)就不会对hue产生影响；
+
+原神所采用的做法，参考了这篇文章[HDR color grading and display in Frostbite](https://www.ea.com/frostbite/news/high-dynamic-range-color-grading-and-display-in-frostbite)，将调整放在了color grading的shader计算中去了；HDR设备下的输出可参考的案例有unity的[High Dynamic Range (HDR) Output](https://docs.unity.cn/Packages/com.unity.render-pipelines.high-definition@14.0/manual/HDR-Output.html)以及unreal的[High Dynamic Range Display Output](https://docs.unrealengine.com/5.0/en-US/high-dynamic-range-display-output-in-unreal-engine/)
 
 关于tonemapping的更全面介绍，可参考[Tone Mapping](https://www.cl.cam.ac.uk/~rkm38/pdfs/tone_mapping.pdf)(待阅读)
