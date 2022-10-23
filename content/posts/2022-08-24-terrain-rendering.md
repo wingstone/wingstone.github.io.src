@@ -73,4 +73,10 @@ Svt直接首先将texture进行划分成page，所有的mip都需要划分为pag
 参考[Terrain in Battlefield 3](https://media.contentapi.ea.com/content/dam/eacom/frostbite/files/gdc12-terrain-in-battlefield3.pdf)以及[Chen_Ka_AdaptiveVirtualTexture](https://ubm-twvideo01.s3.amazonaws.com/o1/vault/gdc2015/presentations/Chen_Ka_AdaptiveVirtualTexture.pdf)
 rvt中page的生成是runtime的，从而避免了离线存储大量的page数据；对于需要实时生成的texture具有很大的优势，比如地形所需要的blend后的color、smooth等数值；
 
+上述两篇文章又各自分别在RVT的基础上进行了扩展，用于解决virtual texture size过大时，所使用的page table太大而影响了page table索引的效率问题，各自分别提出了clipmap rvt与adaptive rvt方法来解决此问题；
+
+**clipmap rvt**：将clipmap的技术应用在page table上，从而使得page table不用使用大的texture存储完整的page table信息，只需要使用一个小的texture array与一个小的texture即可存储page table的clipmap信息；
+
+**adaptive rvt**：adaptive的思想是virtual texture size的尺寸可以突破当前page table所限制的尺寸；具体方法是地形中sector的virtual texture size大小是可变的，离相机越近virtual texture size越大，甚至突破page table的限制；而page table为了存储所不能存下的信息，内部结构会进行调整，以四叉树的形式重新存储virtural uv到physical page的映射信息；其中sector的信息会以indirect texture的形式来进行存储传递；具体可参考unreal的做法；
+
 RVT与SVT有区别的环节为vt的更新环节，physical texture所需要的page是实时去渲染出来，然后再去更新physical texture；
