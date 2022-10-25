@@ -57,7 +57,7 @@ float sin(float a)
 
 ### asin
 
-atan会转化为泰勒级数展开的拟合形式，在unity查看编译后的源码能发现实现确实如此；
+asin会转化为泰勒级数展开的拟合形式，在unity查看编译后的源码能发现实现确实如此；
 
 ```c++
 // Handbook of Mathematical Functions
@@ -139,7 +139,7 @@ float2 atan2(float2 y, float2 x)
 
 ### pow
 
-底层会采用exp2与log2来实现；
+底层会采用exp2与log2来实现，而exp2与log2都会以native的硬件形式来支持，硬件的实现实际上是通过位操作来计算得出（比如对于整数，直接通过位的左移与右移操作来实现）；
 
 ```c++
 float3 pow(float3 x, float3 y)
@@ -185,9 +185,9 @@ float3 refract( float3 i, float3 n, float eta )
 }
 ```
 
-### refract
+### normalize
 
-refract根据折射原理来实现；
+normalize会使用resqrt来实现，而resqrt的实现可能为native instruction，也可能使用pow函数实现；
 
 ```c++
 float3 normalize(float3 v)
