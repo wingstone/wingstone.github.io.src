@@ -17,6 +17,38 @@ Irradiance Volumes为一种全局光照技术，参考[Irradiance Volumes for Ga
 
 首先需要理解光照渲染中常见的radiance、irradiance等物理概念，随后需要了解IBL背后的技术（只理解diffuse部分即可，主要需要知道SH在渲染中的应用）；
 
+首先常见的渲染方程为：
+
+$$
+\int_H {L_i(l)BRDF(l,v)V_i(l)cos\theta_l} {\rm d}l
+$$
+
+在不考虑投影的情况下，漫反射渲染方程可以写为：
+
+$$
+\int_H {L_i(l)\frac{1}{\pi}cos\theta_l} {\rm d}l
+$$
+
+整个结果可以认为是函数`$cos\theta_l$`在各个light方向上的卷积；从而可以使用`$L_i$`与`$cos\theta_l$`的球谐系数的乘积来计算`$L_icos\theta_l$`的球谐系数（这里利用了轴对称函数与普通函数的球谐卷积特性，具体可参考[Stupid Spherical Harmonics (SH) Tricks](http://www.ppsloan.org/publications/StupidSH36.pdf)），在乘以球谐基函数，就能重建卷积后各个方向上的diffuse光照；这就是我们常说的球谐光照技术；
+
+当考虑投影时，漫反射渲染方程为：
+
+$$
+\int_H {L_i(l)\frac{1}{\pi}V_i(l)cos\theta_l} {\rm d}l
+$$
+
+若将`$L_i(l)$`使用球谐系数表示，则漫反射渲染方程为：
+
+$$
+L_i(l) = \sum_{i=0}^k l_i B_i(l)
+$$
+
+$$
+\sum_{i=0}^k l_i \int_H {B_i(l)\frac{1}{\pi}V_i(l)cos\theta_l} {\rm d}l
+$$
+
+其中`$\int_H {B_i(l)\frac{1}{\pi}V_i(l)cos\theta_l} {\rm d}l$`这部分是可以针对具体模型的法线方向来进行预计算的，这就是我们常说的PRT技术，具体可参考[GAMES202_Lecture_06.pdf](GAMES202_Lecture_06.pdf)；
+
 ## 为什么需要irradiance volumes技术
 
 传统的全局光照一般使用lightmap来表示，带来的问题为存储空间大，只适用于静态场景，只能作用于物体表面；

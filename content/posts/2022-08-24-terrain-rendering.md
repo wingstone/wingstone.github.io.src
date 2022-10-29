@@ -79,4 +79,6 @@ rvt中page的生成是runtime的，从而避免了离线存储大量的page数�
 
 **adaptive rvt**：adaptive的思想是virtual texture size的尺寸可以突破当前page table所限制的尺寸；具体方法是地形中sector的virtual texture size大小是可变的，离相机越近virtual texture size越大，甚至突破page table的限制；而page table为了存储所不能存下的信息，内部结构会进行调整，以四叉树的形式重新存储virtural uv到physical page的映射信息；其中sector的信息会以indirect texture的形式来进行存储传递；具体可参考unreal的做法；
 
+**贴图压缩**：一般来说，生成的rvt都是以rgba32的rt格式来存储，用于渲染时会带来一定的带宽问题，解决这个问题的方法就是使用运行时贴图压缩算法，将贴图压缩成特定平台下的DXT、ASTC等格式，然后再用于渲染，从而解决带宽问题；由于执行压缩算法本省会带来一定开销，是否一定能带来性能提升，还需进一步测试；压缩算法可以只应用于刚渲染出来的page，这样可以大大提升算法的利用率；
+
 RVT与SVT有区别的环节为vt的更新环节，physical texture所需要的page是实时去渲染出来，然后再去更新physical texture；
