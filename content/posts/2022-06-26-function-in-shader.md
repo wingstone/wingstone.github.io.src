@@ -162,7 +162,7 @@ float smoothstep(float a, float b, float x)
 
 ### reflect
 
-reflect根据反射原理来实现；
+reflect根据反射原理来实现；注意，i向量应朝向平面；
 
 ```c++
 float3 reflect( float3 i, float3 n )
@@ -173,7 +173,7 @@ float3 reflect( float3 i, float3 n )
 
 ### refract
 
-refract根据折射原理来实现；
+refract根据折射原理来实现；注意，i向量应朝向平面，eta为extIOR/intIOR；
 
 ```c++
 float3 refract( float3 i, float3 n, float eta )
