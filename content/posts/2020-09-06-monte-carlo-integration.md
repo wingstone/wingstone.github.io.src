@@ -3,6 +3,7 @@ title: 'Monte Carlo Integration'
 date: 2020-09-06 14:35:52
 categories:
 - 图形学
+- 离线渲染
 tags:
 - 蒙特卡洛积分
 metaAlignment: center
@@ -168,6 +169,23 @@ $$
 f(\theta, \phi) = sin\theta f(\omega)
 $$
 
+## 一维随机采样
+
+### tent filter
+
+pdf：
+
+$$  
+p(x) =  1-|x|, -1<x<1
+$$
+
+采样变换为：
+
+$$
+p(x) = \begin{cases} \sqrt{2\xi}-1, &{0 <\xi<0.5} \\
+1-\sqrt{2-2\xi}, &{0.5<\xi<1} \end{cases}
+$$
+
 ## 二维随机采样
 
 多维密度函数采样可以表示为一维密度的乘积，如：
@@ -218,8 +236,8 @@ $$
 ### 随机单位球面采样
 
 $$
-x = sin\theta cos\phi = cos(2\pi\xi_2)\sqrt{\xi_1(1-\xi_1)}\\
-y = sin\theta sin\phi = sin(2\pi\xi_2)\sqrt{\xi_1(1-\xi_1)}\\
+x = 2sin\theta cos\phi = 2cos(2\pi\xi_2)\sqrt{\xi_1(1-\xi_1)}\\
+y = 2sin\theta sin\phi = 2sin(2\pi\xi_2)\sqrt{\xi_1(1-\xi_1)}\\
 z = con\theta = 1-2\xi_1
 $$
 
@@ -280,3 +298,5 @@ $$
 - 追踪光线沿表面的反弹光线：重要性采样下的MC积分，单根光线下单次采样的MC积分；
 - 追踪相交点处直接光照光源的随机选取：均匀分布下的MC积分，单跟光线单次选取；
 - 追踪相交点处直接光照光源上点的随机采样：均匀分布下的MC积分，单个光源单次选取；
+
+总结来说，就是在整个tracing过程中只是用一条光线，在该光线tracing的过程中，根据不同情况下的概率密度分布来调整该光线的方向变化；
