@@ -171,7 +171,7 @@ Float Tr(ray, sampler) {
 常用的项函数为HG项函数，可参考[pbrt 11.2](https://pbr-book.org/3ed-2018/Volume_Scattering/Phase_Functions)，即
 
 $$
-p_{HG}(cos\theta) = \frac{1}{4\pi} \frac{(1-g^2}{1+g^2+2g(cos\theta))^{3/2}}.
+p_{HG}(cos\theta) = \frac{1}{4\pi} \frac{1-g^2}{(1+g^2+2g(cos\theta))^{3/2}}.
 $$
 
 由于项函数是归一化的，因此项函数即为pdf；对应的均匀分布变换的warp为：
