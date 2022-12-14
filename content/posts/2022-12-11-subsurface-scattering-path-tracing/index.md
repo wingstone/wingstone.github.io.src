@@ -134,3 +134,161 @@ $$
 4. [Approximate Reflectance Profiles for Efficient Subsurface Scattering](https://graphics.pixar.com/library/ApproxBSSRDF/paper.pdf);
 
 ### Diffusion Theory
+
+次表面散射材质一般都有较高的散射属性，而多次散射的发生会使得光照结果越来越趋向均匀，最终呈现出各向同性的材质属性。该理论称之为自相似理论，是的各项异性材质可以转化为各项同性材质进行建模。该理论为Diffusion理论的假设之一；
+
+另外一个核心假设为：每次散射结果都会模糊输入的光照，从而使得高频的光照信息丢失，在散射性较强的材质内，所有的方向性最终都会丢失；基于此观察，radiance可以展开为前两阶spherical moments的结果，即：
+
+$$
+L(x,\vec{\omega}) = \frac {1} {4\pi}\phi(x) + \frac{3}{4\pi} \vec{\omega} \cdot \vec{E}(x)
+$$
+
+其中前一项被称之为scale irridance或fluence，即
+
+$$
+\phi (x) = \int _{4\pi} L(x, \vec{\omega}) d\omega
+$$
+
+后一项被称之为vector irridiance，即
+$$
+\vec{E} (x) = \int _{4\pi} L(x, \vec{\omega}) \vec{\omega} d\omega
+$$
+
+将该项带入光照传输方程，再要所有方向积分，即可得到经典的diffusion 方程（推导过程，建议查看[A Practical Model for Subsurface Light Transport](https://graphics.stanford.edu/papers/bssrdf/bssrdf.pdf);），即：
+
+$$
+D\nabla ^2 \phi(x) = \sigma _a \phi(x) - Q_0(x)
+$$
+
+其中第二项为一阶内散射结果的角积分，即：
+
+$$
+Q_0 (x)= \int _{4\pi} Q(x, \vec{\omega})d\omega
+$$
+
+$$
+Q(x, \vec{\omega}) = \sigma _s \int _{4\pi} p(\vec{\omega}', \vec{\omega}) L_{ri}(x, \vec{\omega}')d\vec{\omega}'
+$$
+
+其中`$L_{ri}$`为一阶散射项，即：
+
+$$
+L_{ri}(x_i + s \vec{\omega_i}, \vec{\omega _i}) = e ^{-\sigma _t s} L_{i}(x_i, \vec{\omega _i})
+$$
+
+### Monopole Solution
+
+假如介质空间是无限的，介质内存在一个点光源的情况下，diffusion方程是有解析解的，即：
+
+$$
+\phi (x) = \frac {\Phi}{4\pi D} \frac {e^{-\sigma_{tr}r(x)}} {r(x)}
+$$
+
+其中`$\Phi$`为光源强度，r为据光源距离，`$\sigma_{tr}$`为：
+
+$$
+\sigma_{tr} = \sqrt{3 \sigma _a \sigma _t '}
+$$
+
+$$
+\sigma _t ' = \sigma _s ' + \sigma _a
+$$
+
+$$
+\sigma _s ' = \sigma _s(1-g)
+$$
+
+### 边界条件
+
+对于存在边界的情况，边界条件应为边界上的净通量为0，即：
+
+$$
+\int _{2\pi \_} L(x_s, \vec{\omega})(\vec{\omega}\cdot\vec{n}(x_s)) d\omega = 0
+$$
+
+若边界内外ior不一致，最终可得到边界条件两项的表达式，即：
+
+$$
+\phi(x_s)-2AD(\vec{n}\cdot\vec{\nabla}) \phi(x_s) = 0
+$$
+
+由此可得到profile Rd的表达式为：
+
+$$
+R_d(r) = -D\frac{\vec{n}\cdot\vec{\nabla}\phi}{d\Phi_i(x_i)}
+$$
+
+其中：
+
+$$
+r = ||x_s-x_i||
+$$
+
+### Dipole Solution
+
+在边界方程已知的情况下，现在的主要问题就是求解边界方程，对于次表面散射，一般使用的边界条件就是无限半平面假设；为了得到精确解，使用的求解模型有多种，这里介绍最基础的dipole solution；
+
+dipole假设存在一对点光源分别位于边界条件的上方与下方，从而构成dipole，对应的解为：
+
+$$
+\phi(x) = \frac{\Phi}{4 \pi D}(\frac{e^{-\sigma_{tr}d_r}}{d_r} - \frac{e^{-\sigma_{tr}d_v}}{d_v})
+$$
+
+其中：
+
+$$
+d_r = ||x-x_r||
+$$
+
+$$
+d_v = ||x-x_v||
+$$
+
+dipole距边界的距离分别为：
+
+$$
+z_r = 1/\sigma_t'
+$$
+
+$$
+z_v = z_R+4AD
+$$
+
+最终得到的profile的解为：
+
+$$
+R_d(r) = \frac{\alpha'}{4 \pi D}((\sigma_{tr}d_r+1)\frac{e^{-\sigma_{tr}d_r}}{\sigma_t' d_r^3} + z_v(\sigma_{tr}d_v + 1) \frac{e^{-\sigma_{tr}d_v}}{\sigma_t' d_v^3})
+$$
+
+需要注意的是此profile只能表示multi scattering部分，还有single scattering部分没有计算（因为在转换为点光源时，已经考虑了一次scattering事件）；类似的方案还有其他dipole的改进模型，以及beam diffusion等；
+
+> pbrt中使用的就是beam diffusion模型，链接为[Photon Beam Diffusion: A Hybrid Monte Carlo Method for Subsurface Scattering](https://graphics.pixar.com/library/PhotonBeamDiffusion/paper.pdf)；
+> 值得一提的是，该文章中明确指出了searching light问题中profile的定义，并提出了使用MC的方法来利用多层dipole来计算profile；
+
+> **让人疑惑的是，profile的定义明显考虑了fresnel的影响，而seperable bssrdf在profile外也考虑了fresnel的影响，那么两次fresnel影响不就重复了么？**
+
+> 实际上，还有一部分Reduced Radiance没有考虑，不过一般都会忽略此项，此项可以认为是direct lighting部分，具体可参考[BSSRDF Explorer: A rendering framework for the BSSRDF 2.6.1](https://benedikt-bitterli.me/bachelor-thesis.pdf)
+
+### single scattering
+
+前面提到大部分diffusion解决方案都会丢失single scattering部分，因此single scattering部分需要单独计算；由于不需要考虑multi scattering的影响，single scattering的计算也就相对简单很多；可以直接使用散射方程来进行计算：
+
+$$
+L_o^{(1)}(\vec{x_o}, \vec{\omega_o}) = f_t(\vec{x_o}, \vec{\omega_o}) f_t(\vec{x_i}, \vec{\omega_i}) e^{-s_i\sigma_t} e^{-s_o\sigma_t} \alpha p(\vec{\omega_i}\cdot \vec{\omega_o}) L_i(\vec{x_i}, \vec{\omega_i})
+$$
+
+在[Photon Beam Diffusion](https://graphics.pixar.com/library/PhotonBeamDiffusion/paper.pdf)文章中提出了single scattering profile的概念，并使用MC的方法来计算对应的profile，pbrt中使用的就是此方法；
+
+### Approximate Reflectance Profiles
+
+前面提到的各种diffusion模型都有其局限性，[Approximate Reflectance Profiles for Efficient Subsurface Scattering](https://graphics.pixar.com/library/ApproxBSSRDF/paper.pdf)文章直接根据大量的profile观察，直接提出了指数拟合的方法，拟合结果非常接近MC，作者称其为**normalized diffusion**；改方法另外一个特点是，将multi scattering，single scattering进行了集成，提供了统一的公式来描述所有材质的profile，使得该方法具有很大的工程友好性；其profile为：
+
+$$
+R(r) = As\frac{e^{-sr/l} + e^{-er/(3l)}}{8\pi lr}
+$$
+
+$$
+s=3.5 + 100(A-0.33)^4
+$$
+
+已知的工程应用有**Big Hero 6**，**Unity HDRP**；
