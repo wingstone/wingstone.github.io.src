@@ -6,6 +6,7 @@ categories:
 tags: 
 - Capture Frame
 - Pipeline
+draft: true
 ---
 
 光遇渲染效果截帧分析，抓帧使用的一加手机pro7，屏幕分辨率为3120x1440 ；这里做一个粗略的渲染分析，细节上需要慢慢研究；

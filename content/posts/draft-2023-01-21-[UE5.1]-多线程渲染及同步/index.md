@@ -1,0 +1,77 @@
+---
+title: '[UE5.1]-多线程渲染及同步'
+author: wingstone
+date: 2022-01-21
+categories:
+- Unreal
+- Rendering pipeline
+- Real Time Rendering
+tags: 
+- 总结
+draft: true
+---
+
+这篇文章主要记录并分析UE引擎中多线程渲染中如何实现同步的问题；参考[Threaded Rendering](https://docs.unrealengine.com/5.1/en-US/threaded-rendering-in-unreal-engine/)
+
+<!--more-->
+
+UE采用多线程的机制来维持渲染流程，使用了最典型的Game Thread、Render Thread、RHI Thread三线程的渲染流程；稍微使用不慎，就会产生很难复现的Race Condition问题；因此，对UE的多线程机制进行深入的了解，才能写出安全可靠的渲染代码；
+
+## Thread specific data structures
+
+使用线程分离的数据结构，可以很好的避免Race Condition的出现；不同的线程维护并修改不同的自己的数据结构，从而避免跨线程修改数据情况的出现；
+
+如：UPrimitiveComponent是专属于GameThread的基础类，用于模型的渲染，只能在GameThread下进行数据的修改；而FPrimitiveSceneProxy是专属于RenderThread的基础类，只能在RenderThread下进行数据的修改；UActorComponent::RegisterComponent会添加一个UPrimitiveComponent至场景中，同时创建一个FPrimitiveSceneProxy用于RenderThread中pipeline得渲染；
+
+## Performance considerations
+
+GameThread会滞后一至两帧来阻塞自身线程，使得自身线程与RrenderThread同步，如果不进行滞后同步，则会产生性能问题，使用多线程也便没了意义；在loading以及gc时，使用阻塞也是一个不好的方法，不如使用UE所提供的async streaming levels的机制来进行同步；此外，UE还提供了大量的其他异步机制来进行同步；
+
+## Inter-thread communication
+
+### Asynchronous
+
+GameThread与RenderThread之间的信息同步，使用ENQUEUE_UNIQUE_RENDER_COMMAND_XXXPARAMETER宏来进行，该宏会生成带有虚函数Execute的类，同时该宏还会在GameThread插入一条指令至rendering command queue，用于在ReanderThread运行相关指令（即Execute函数）；
+
+FRenderCommandFence提供了在GameThread跟踪RenderThread进度的方法；GameThread调用FRenderCommandFence::BeginFence来开启一个fence，调用FRenderCommandFence::Wait来阻塞至该fence运行完毕；同样也可以调用GetNumPendingFences来查看剩余fence的数量，一次来查看运行进度，当fence数量为0时，则RenderThread完成了所有fence的运行；
+
+### Blocking
+
+FlushRenderingCommands提供了标准的方式来阻塞GameThread直至RenderThread与其同步；该方式经常用在offline（editor）操作中；
+
+### Rendering resources
+
+FRenderResource提供了渲染资源（比如FVertexBuffer, FIndexBuffer, etc）初始以及释放相关的所有接口，任何继承自FRenderResource的渲染资源，都必须在渲染前进行初始化，在删除前进行资源释放；FRenderResource::InitResource必须在RenderThread进行调用， BeginInitResource可以在GameThread插入一条调用FRenderResource::InitResource的渲染指令，至rendering command queue中，从而在GameThread中进行渲染资源的初始化；而RHI functions只能在RenderThread中进行调用；
+
+> FRenderResource只能在RenderThread中进行使用（也许还有RHIThread），因为其是只用于渲染的资源，并不会被其他功能和线程所使用；
+
+### UObjects and Garbage Collection
+
+GC发生在GameThread，并操作在UObjects上；GameThread可能会删除一个UObject，而此UObject仍在被RenderThread的指令所引用；为避免此情况的发生RenderThread不应该解引用一个UObject pointer，除非有机制能够保证RenderThread不再引用某一UObject之后，此UObject才会被删除；
+
+UPrimitiveComponent的回收就是一个很好的例子，FRenderCommandFence会调用DetachFence，在RenderThread已经处理掉对应的detach command之前，阻止GC删除UObject；
+
+## Game thread FRenderResource handling
+
+在UE中，有两种类型的FRenderResource需要进行区别对：一种是static resources，只会在加载以及editor中进行修改；另外一种是dynamic resources，会每帧根据GameThread最后模拟的结果进行更新；
+
+### Static resources
+
+以静态资源USkeletalMesh为例，其调用顺序为：
+
+1. USkeletalMesh::PostLoad会在加载时调用，该函数会调用InitResources并最终调用BeginInitResource来完成对应index buffer的初始化；
+2. 一个UPrimitiveComponent被注册，并使用USkeletalMesh的index buffer来进行渲染；
+3. GC在某一时刻判断该UPrimitiveComponent不再被引用（例如level卸载），决定detach此UPrimitiveComponent；此时GameThread还不能删除USkeletalMesh的index buffer对应的内存，因为其可能正在被RenderThread所使用；
+4. GC调用USkeletalMesh::BeginDestroy，其在GameThread向render command queue中插入指令BeginReleaseResource(&IndexBuffer)；在GameThread中等在该指令完成是比较耗时的操作，可以采用异步的机制，使用fence来查看指令处理的进度；
+5. GC调用USkeletalMesh::IsReadyForFinishDestroy，该函数会在RenderThread处理完该fence后返回true；此时，便可以安全地删除USkeletalMesh的index buffer对应的内存；
+6. GC最后调用UObject::FinishDestroy来完成最终的内存释放；USkeletalMesh的析构函数会调用FRawStaticIndexBuffer的析构函数，并在其内部调用TArray的析构函数，来释放最终index buffer的内存；
+
+### Dynamic resources
+
+The skeletal mesh的骨骼变换矩阵就是一个很好的例子，其会在GameThread中每帧调用动画后，更新骨骼矩阵；随后作为shader constant来驱动模型的变化；其调用顺序为：
+
+1. USkinnedMeshComponent::CreateRenderState_Concurrent分配USkinnedMeshComponent::MeshObject，此时GameThread只能写入至对应的MeshObject指针；
+2. USkinnedMeshComponent::UpdateTransform会在每帧调用FSkeletalMeshObjectGPUSkin::Update来更新骨骼矩阵变换；此时便可从GameThread向RenderThread传递骨骼数据，首先向heap中分配内存FDynamicSkelMeshObjectData，随后将骨骼数据copy至其中，再随后使用ENQUEUE_UNIQUE_RENDER_COMMAND_TWOPARAMETER将此copy数据传递至RenderThread，由RenderThread负责此copy数据的管理与释放；
+3. 在某一时刻，USkinnedMeshComponent被detached，GameThread向RenderThread传递释放所有RenderResource的指令并将MeshObject指针设为NULL；此时所使用的内存释放机制为deferred deletion mechanism；GameThread会调用BeginCleanup(MeshObject)，而FSkeletalMeshObject实现了对应的FDeferredCleanupInterface接口，会在最终安全的情况下释放内存；
+
+> 需要跟进程序进一步研究；

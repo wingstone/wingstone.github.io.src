@@ -156,8 +156,21 @@ AO使用亮度为1的环境光照射albedo为1的diffuse物体，得到结果就
 7. 持续以上过程，针对每个像素的下个mip对应的（2x2px）进行warp，直到抵达最低mip；
 8. output：得到符合像素亮度分布的采样，并且复杂度为$O(log(m))$
 
+> 实际过程中有两个注意点：
+> 1. 当使用IBL的亮度进行归一化时，亮度需要乘以IBL转为方向后的sinTheta；sinTheta的计算为`Float sinTheta = std::sin(Pi * Float(v + 0.5f) / Float(height));`
+> 2. 每个像素的pdf应该是IBL的区间为0-1情况下的分布，要避免像素分辨率所带来的影响；
+
 ![](hsw.png)
 
+当使用IBL来进行光照时，需要将二维的IBL采样转换到着色点上的半球面分布，这一部分，具体可参考[Sample Infinite Area Lights](https://pbr-book.org/3ed-2018/Light_Transport_I_Surface_Reflection/Sampling_Light_Sources#InfiniteAreaLights)；最终得到的转换公式为：
+
+$$
+p(\omega) = \frac {p(u,v)} {2\pi ^2 sin\theta }
+$$
+
+最终得到的渲染效果图如下图所示：
+
+![](ajax-rough.png)
 
 ## assignment4：white style ray tracing
 
@@ -266,3 +279,7 @@ Multiple Importance Sampling会综合考虑brdf采样与光源采样的影响；
 > 1. 对于Dielectrics、mirror材质，不需要使用next event estimation（即采样光源计算直接光照）；因为其brdf分布为delta函数，只有一个有效方向，直接不断tracing即可；
 > 2. 对于含有粗糙度的transmission，需要计算的则为btdf；如果对ggx分布计算btdf以及对应的pdf，需要额外的计算公式，具体公式以及推倒可参考[Microfacet Models for Refraction through Rough Surfaces
 ](https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.html)。
+
+最终得到的渲染效果图如下图所示：
+
+![](veach_mis.png)
