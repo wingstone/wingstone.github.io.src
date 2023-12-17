@@ -10,11 +10,17 @@ tags:
 draft: true
 ---
 
-记录当前主流图形api的常用函数及概念速查表
+记录当前主流图形api的常用函数及各图形api之间的概念对比
 
 <!--more-->
 
-记录当前主流图形api的常用函数及概念速查表
+记录当前主流图形api的常用函数及各图形api之间的概念对比
+
+## 官方demo参考
+
+- direct3d11: https://github.com/walbourn/directx-sdk-samples
+- direct3d12: https://github.com/microsoft/DirectX-Graphics-Samples
+- direct3d11: https://github.com/walbourn/directx-sdk-samples
 
 ## Direct3D11
 
@@ -267,6 +273,22 @@ ThrowIfFailed(m_commandList->Close());
 
 ### 与Direct3D11的区别
 
+#### 设备获取
+
+Direct3D12创建设备流程如下，这是正向的设备获取流程：
+
+1. 创建IDXGIFactory；
+2. 穷举硬件设备，获取IDXGIAdapter；
+3. 根据IDXGIAdapter创建ID3D12Device；
+
+Direct3D11则采用反向的方式来获取，流程如下：
+
+1. 将IDXGIAdapter设置为nullptr的情况下，直接创建ID3D11Device；
+2. 然后获取与ID3D11Device所绑定的IDXGIAdapter；
+3. 获取IDXGIAdapter所对应的parent IDXGIFactory；
+
+也许Direct3D11也有正向获取的流程，但是官方demo里没给，毕竟没有正向获取流程，就无法人为的选择adapter；
+
 #### 指令相关
 
 DX12暴露了底层的command机制，所有command的执行，需要进行手动管理；其中
@@ -325,7 +347,7 @@ dx12暴露了内部的**ID3D12DescriptorHeap**，来让用户手动管理Descrip
 
 resource的状态切换需要用户进行手动管理，需要手动调用Resource Barrier()来保证resource状态切换完毕后，才能进行后续操作；
 
-resource数据的上传，可以通过传统map的方式上传；也可单独创建uploadbuffer并上传数据，再将数据从uploadbuffer拷贝至目标resource，随后执行所记录的command；
+resource数据的上传，可以通过传统map的方式上传；也可单独创建uploadbuffer并上传数据，再将数据从uploadbuffer拷贝至目标resource，随后执行所记录的command；选用哪种方式，需要根据资源cpu/gpu的使用情况来决定；
 
 dx12暴露了内部cpu/gpu同步所使用的**ID3D12Fence**，用来保证所记录的command在当前cpu点在gpu上运行完毕；
 
@@ -349,3 +371,174 @@ if (m_fence->GetCompletedValue() < fence)
 
 m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 ```
+
+## Direct3D12与Vulkan的区别
+
+### 设备获取
+
+#### 概念对比
+
+| D3D12 | Vulkan |
+| --- | --- |
+| debugLayer | validationLayer |
+| IDXGIFactory | VkInstance |
+| IDXGIAdapter | VkPhysicalDevice |
+| ID3D12Device | VkDevice |
+
+debugLayer与validationLayer都是用于使用api时，获取出错情况下的调试信息，需要在创建device时进行设置开启；
+
+这里的命名感觉Vulkan的好些，我们后面所使用的device是抽象出来的logical device，需要与硅晶体组成的physical device进行区分；
+
+adapter/physicaldevice对于同一台设备，可能会有多个，需要用户进行选择；
+
+实际流程中所敲的代码，D3D12所敲的量远小于Vulkan，Vulkan的device创建过程中，需要考虑extension，Vulkan的部分功能（比如validation）需要以extension的形式开启；
+
+Vulkan创建对象时，经常以会创建`**Info`形式的结构体来描述对象，而D3D12则是创建`**_DESC`形式的结构体来描述；
+
+#### 创建流程
+
+1. 创建IDXGIFactory/VkInstance，并在创建的过程中开启debugLayer/validationLayer；
+2. 针对Vulkan，用于debug时，还需要创建debugMessenger（VkDebugUtilsMessengerEXT）；
+3. 穷举硬件设备，获取IDXGIAdapter/VkPhysicalDevice；
+4. 根据IDXGIAdapter创建ID3D12Device/VkDevice；
+
+### 获取SwapChain
+
+#### 概念对比
+
+| D3D12 | Vulkan |
+| --- | --- |
+| HWND | VkSurfaceKHR |
+| IDXGISwapChain | VkSwapchainKHR |
+
+这里HWND与VkSurfaceKHR并不完全类似，学过windows编程的都知道，HWND代表窗口的句柄，包含了很多窗口的信息，而Vulkan的Surface代表更多的是绘制区域的含义，不管怎么，两者都能唯一包含窗口上的绘制区域；引起可以用来创建对应的SwapChain；
+
+#### 创建流程
+
+1. 获取HWND/VkSurfaceKHR，Vulkan可以通过GLFW提供的api获取，当不使用GLFW时，需要自己去获取；
+2. 创建对应的SwapChain，D3D使用Factory进行创建，并且需要先创建CommandQueue，Vulkan直接使用Device创建即可；
+
+### Command执行框架
+
+#### 概念对比
+
+| D3D12 | Vulkan |
+| --- | --- |
+| ID3D12CommandQueue | VkQueue |
+| ID3D12CommandAllocator | VkCommandPool |
+| ID3D12GraphicsCommandList | VkCommandBuffer |
+
+这一部分命名感觉dx的更好一些：
+
+1. CommandQueue比单纯的Queue更好的说明了其与Command相关；
+2. CommandBuffer相比CommandList有一定的误导性，让人误以为其与Constant buffer等buffer一样是一种资源；
+
+另外，Vulkan的present也需要通过Queue来执行，因此需要针对present创建单独的Queue；
+
+#### 创建流程
+
+1. 使用Device分别创建三个对象即可，针对Vulkan需要创建两个Queue；
+
+
+### 准备RenderTarget
+
+#### 概念对比
+
+| D3D12 | Vulkan |
+| --- | --- |
+| ID3D12Resource | VkImage |
+| CD3DX12_CPU_DESCRIPTOR_HANDLE | VkImageView |
+|  | VkFramebuffer |
+
+由于D3D12中Texture与其他Buffer资源的统一，所以这里的资源使用的是ID3D12Resource，而Vulkan中仍然使用VkImage与VkBuffer的区分，所以这里使用的是VkImage；
+
+CD3DX12_CPU_DESCRIPTOR_HANDLE即在D3D中常使用的RTV，在D3D12中，所有的View都转换为了Descriptor，因此RTV这里才用了这个名字（充分说明了D3D12没有转换完整。。。），而Vulkan中依旧使用VkImageView；
+
+Vulkan多出来了VkFramebuffer的概念，用于与RenderPass的使用相结合（我感觉VkImageView的概念与VkFramebuffer的概念有点重合。。。）；
+
+
+#### 创建流程
+
+1. 获取ID3D12Resource/VkImage，D3D12直接使用SwapChain即可获取，Vulkan需要使用Device来从SwapChain中获取；
+2. 使用Device创建对应的RTV/VkImageView，因为D3D12所使用的函数仍然是`CreateRenderTargetView()`，所以我这里直接说RTV；另外由于D3D12RTV转化为了Descriptor，所以需要先创建DescriptorHeap，才能创建对应的RTV；
+3. 针对Vulkan，直接使用Device创建VkFramebuffer即可；
+
+### PipeLine资源准备
+
+#### 概念对比
+
+| D3D12 | Vulkan |
+| --- | --- |
+| ID3D12Resource | VkBuffer |
+|  | VkDeviceMemory |
+| D3D12_VERTEX_BUFFER_VIEW |  |
+| ID3D12Resource | VkImage |
+|  | VkImageView |
+|  | VkSampler |
+| ID3D12DescriptorHeap | VkDescriptorSet |
+|  | VkDescriptorSetLayout |
+|  | VkDescriptorPool |
+| ID3DBlob | VkShaderModule |
+
+Vertex Buffer/Index Buffer/Uniform Buffer都属于buffer资源，使用相同的函数创建即可
+；
+对于Vulkan，Buffer的存储，由单独的Memory来存储，需要进行单独创建，并绑定至对应Buffer（不如D3D，多次一举。。。）；
+
+D3D多了VertexBufferView的概念，用于与其他View的概念对齐，Vulkan则没有此概念；因此D3D绑定VBV，Vulkan绑定Buffer（感觉对于Vulkan，Buffer成了View，Memory成了Buffer。。。）；
+
+对于Texture，D3D仍然使用ID3D12Resource，Vulkan则使用VkImage；
+
+D3D中ConstantBufferView的概念与ShaderResourveView的概念都转化为了Descriptor；Vulkan也使用了Descriptor的概念，但仍然保留了ImageView，不过不能直接使用，需要依托于Descriptor来使用；D3D中的Sampler不再单独创建绑定，依托于后面的ID3D12RootSignature来绑定，而Vulkan需要单独创建，依然依托于Descriptor来使用；
+
+对于Descriptor的使用方式，Vulkan会使用VkDescriptorSetLayout来进行描述，并且此Layout用于后续绑定到PipelineLayout中；
+
+但Descriptor并不会单独出现，其依托于ID3D12DescriptorHeap/VkDescriptorSet来使用，同时不同view的类型，需要使用多个DescriptorHeap来表示；同样，这里Vulkan多了一步，将其存储拆分到了VkDescriptorPool中；
+
+对于buffer的同步，可以采用map/unmap以及先创建uploadbuffer，随后从uploadbuffer拷贝至目标buffer，两种类型；选用哪种方式，需要根据资源cpu/gpu的使用情况来决定；
+
+Shader的创建，两者差别不大，使用Device创建即可；
+
+
+#### 创建流程
+
+1. 根据使用buffer的类型，使用Device进行创建即可；
+
+### PipeLine创建与使用
+
+#### 概念对比
+
+| D3D12 | Vulkan |
+| --- | --- |
+| ID3D12RootSignature |  |
+|  | VkRenderPass |
+|  | VkPipelineLayout |
+| ID3D12PipelineState | VkPipeline |
+
+D3D使用ID3D12RootSignature来定义绑定到PipeLine中的资源，比如sampler；而Vulkan直接将Sampler绑定到Descriptor中；
+
+Vulkan使用VkPipelineLayout用来将DescriptorSetLayout绑定到PipeLine中；D3D没有此环节；
+
+Vulkan使用了RenderPass的概念来定义Pass，并且引入了SubPass的概念来面向TiledMemory；D3D12的官方Demo没有提供，但在后面的版本里也引入了RenderPass的使用；
+
+ID3D12PipelineState/VkPipeline即我们所熟知的PSO，里面绑定了一次绘制所绑定的所有状态，包括Shader、Shader所使用的资源、BlendStat、VSLayout等等；
+
+
+#### 创建流程
+
+1. 使用Device进行创建即可；
+
+### 帧同步
+
+#### 概念对比
+
+| D3D12 | Vulkan |
+| --- | --- |
+| ID3D12Fence | VkFence |
+
+在Fence定义上，D3D与Vulkan并无太大差别，都是Fence配合CurrentFrameLai保证当前帧的绘制完成；
+
+
+#### 创建流程
+
+1. 使用Device进行创建即可；
+
