@@ -6,6 +6,7 @@ categories:
 - unreal
 tags: 
 - renderpipeline
+draft: true
 ---
 
 归纳总结unreal中移动渲染管线的主要顺序及思路，以及这样做背后的思考，便于以后修改ue移动管线时有一个全局的把控；
