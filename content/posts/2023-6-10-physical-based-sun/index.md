@@ -88,8 +88,3 @@ $$
 为luminance沿角度的积分，即为我们所得到的LightIlluminance；也即我们设置时所改变的物理量；同时也简化了渲染方程的计算；
 
 ## Reference
-
-1. [Byte alignment and ordering](https://eventhelix.com/embedded/byte-alignment-and-ordering/#:~:text=General%20Byte%20Alignment%20Rules%201%20Single%20byte%20numbers,%20total%20structure%20is%204%20bytes.%20More%20items)
-2. [Purpose of memory alignment](https://stackoverflow.com/questions/381244/purpose-of-memory-alignment)
-3. [Data alignment: Straighten up and fly right](https://developer.ibm.com/articles/pa-dalign/)
-4. [The Lost Art of Structure Packing](http://www.catb.org/esr/structure-packing/)
