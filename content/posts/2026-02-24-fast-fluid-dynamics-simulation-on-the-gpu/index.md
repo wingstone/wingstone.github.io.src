@@ -28,7 +28,7 @@ $$
 转换为流体方程则是：
 
 $$
-\rho \left(\frac{\partial \mathbf{u}}{\partial t} + (\mathbf{u} \cdot \nabla) \mathbf{u}\right) = -\nabla p + \mu \nabla^2 \mathbf{u} + \rho \mathbf{f}
+\rho \frac{D \mathbf{u}}{D t} = \rho \left(\frac{\partial \mathbf{u}}{\partial t} + (\mathbf{u} \cdot \nabla) \mathbf{u}\right) = -\nabla p + \mu \nabla^2 \mathbf{u} + \rho \mathbf{f}
 $$
 
 该方程称之为NS方程，其中 $\rho$ 即为牛顿公式中的 $m$ ，括号中的和即为流体微元的加速度，等号右边即为流体微元所受的外力；
@@ -194,3 +194,5 @@ u = subtractPressureGradient(u, p);
 
 1. [fast fluid dynamics simulation gpu](https://developer.nvidia.com/gpugems/gpugems/part-vi-beyond-triangles/chapter-38-fast-fluid-dynamics-simulation-gpu)
 2. [NS推导过程](https://www.sohu.com/a/616386858_115565)
+3. [迭代法求解线性方程组](https://mp.weixin.qq.com/s?__biz=MzUxNzE2NjM0MA==&mid=2247484915&idx=1&sn=73f0190c445f7157ddfcfaf4a2a6c731&chksm=f99d0198ceea888ef47567682d8e86679c30ff07eade4e79efc9ba148403f76e967865b1b3d1&token=1966566026&lang=zh_CN#rd)
+4. [Jacobi迭代求解二维Possion方程实践](https://mp.weixin.qq.com/s?__biz=MzUxNzE2NjM0MA==&mid=2247484972&idx=1&sn=1285c1115aaecc5497315dd7cf047aa4&chksm=f99d0247ceea8b51c616838b1ebf2228a84d2b758753d3e90cb246eed808a97493bdd3103a93&token=1966566026&lang=zh_CN#rd)
