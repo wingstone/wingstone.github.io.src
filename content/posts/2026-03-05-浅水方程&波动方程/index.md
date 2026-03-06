@@ -28,25 +28,27 @@ tags:
 连续性方程为：
 
 $$
-\frac{\partial H}{\partial t} + \frac{\partial \left( Hu \right)}{\partial x} + \frac{\partial \left( Hv \right)}{\partial y} = 0
+\frac{\partial H}{\partial t} + \frac{\partial \left( H u \right)}{\partial x} + \frac{\partial \left( H v \right)}{\partial y} = 0
 $$
 
 动量方程则为：
 
 $$
-\frac{\partial u}{\partial t} + u\frac{\partial u}{\partial x} + v\frac{\partial u}{\partial y} = -g\frac{\partial H}{\partial x}
+\frac{\partial u}{\partial t} + u\frac{\partial u}{\partial x} + v\frac{\partial u}{\partial y} = -g\frac{\partial H }{\partial x}
 $$
 $$
-\frac{\partial v}{\partial t} + u\frac{\partial v}{\partial x} + v\frac{\partial v}{\partial y} = -g\frac{\partial H}{\partial y}
+\frac{\partial v}{\partial t} + u\frac{\partial v}{\partial x} + v\frac{\partial v}{\partial y} = -g\frac{\partial H }{\partial y}
 $$
+
+其中 $H = \eta + d$ ，d为水平面水深， $\eta$ 为水面据水平面的距离，一般取水平面为z为0的位置。
 
 若忽略动量方程中的对流项，即可得到波动方程，即：
 
 $$
-\frac{\partial u}{\partial t} = -g\frac{\partial H}{\partial x}
+\frac{\partial u}{\partial t} = -g\frac{\partial \eta }{\partial x}
 $$
 $$
-\frac{\partial v}{\partial t} = -g\frac{\partial H}{\partial y}
+\frac{\partial v}{\partial t} = -g\frac{\partial \eta }{\partial y}
 $$
 
 ## 解算波动方程
@@ -54,21 +56,38 @@ $$
 将连续性方程对时间t求导，可得：
 
 $$
-\frac{\partial ^2 H}{\partial ^2 t} + h \frac {\partial}{\partial t} \left( \frac{\partial \left( Hu \right)}{\partial x} + \frac{\partial \left( Hv \right)}{\partial y} \right)= 0
+\frac{\partial ^2 \eta }{\partial ^2 t} + d \frac {\partial}{\partial t} \left( \frac{\partial \left( \eta u \right)}{\partial x} + \frac{\partial \left( \eta v \right)}{\partial y} \right)= 0
 $$
 
 将波动方程带入上式可得：
 
 
 $$
-\frac{\partial ^2 H}{\partial ^2 t} = gh \left( \frac{\partial ^2 u}{\partial x} + \frac{\partial ^2 v }{\partial y} \right)
+\frac{\partial ^2 \eta }{\partial ^2 t} = gd \left( \frac{\partial ^2 u}{\partial x} + \frac{\partial ^2 v }{\partial y} \right)
 $$
 
 使用有限差分法可得：
 
 $$
-H^{n+1}_{i,j} = 2H^n_{i,j} - H^{n-1}_{i,j} +\frac{gh \  t}{\partial y}
+\eta ^{n+1}_{i,j} = 2\eta ^n_{i,j} - \eta ^{n-1}_{i,j} +\frac{gd \Delta t^2}{\Delta x^2} \left( \eta ^n_{i-1,j} + \eta ^n_{i+1,j} + \eta ^n_{i,j-1} + \eta ^n_{i,j+1} - 4\eta ^n_{i,j} \right)
 $$
+
+如此即可得到高度随位置以及时间的变化；
+参考王华民老师的课程，上式可以调整为：
+
+$$
+\eta ^{n+1}_{i,j} = \eta ^n_{i,j} + \beta\left( \eta ^n_{i,j}- \eta ^{n-1}_{i,j} \right) +\alpha \left( \eta ^n_{i-1,j} + \eta ^n_{i+1,j} + \eta ^n_{i,j-1} + \eta ^n_{i,j+1} - 4\eta ^n_{i,j} \right)
+$$
+
+其中 $\alpha$ 与 $\beta$ 为两个常数，额外添加的 $\beta$ 参数可以调整时间对动量的影响程度，起到粘性的作用；而 $\alpha$ 参数则为与 $\Delta t$ $\Delta x$有关的常数； 还可以添加一个Damping参数来影响波的衰减，如下所示：
+
+$$
+\eta ^{n+1}_{i,j} = Damping * \eta ^{n+1}_{i,j}
+$$
+
+Damping参数为0-1的值，如此便能暴力的保证最终的水平面可以归0，同时能加快波的衰减；
+
+## 解算浅水方程
 
 
 
