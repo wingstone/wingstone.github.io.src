@@ -143,7 +143,7 @@ $$
 x^{(k+1)}_{i,j} = \frac{x^{(k)}_{i-1,j} + x^{(k)}_{i+1,j} + x^{(k)}_{i,j-1} + x^{(k)}_{i,j+1} + \alpha b_{i,j}}{\beta}
 $$
 
-这里 $x$ 与 $b$ 都表示速度，$\alpha$ 为`dx * dx / (Viscosity * Timestep)`， $\beta$ 为 $4+\alpha$。
+这里 $x$ 与 $b$ 都表示速度，但是 $b$ 表示上一环节（对流项）计算所得到的速度，$\alpha$ 为`dx * dx / (Viscosity * Timestep)`， $\beta$ 为 $4+\alpha$。
 
 #### 外力项
 
@@ -193,6 +193,7 @@ u = subtractPressureGradient(u, p);
 ## Reference
 
 1. [fast fluid dynamics simulation gpu](https://developer.nvidia.com/gpugems/gpugems/part-vi-beyond-triangles/chapter-38-fast-fluid-dynamics-simulation-gpu)
-2. [NS推导过程](https://www.sohu.com/a/616386858_115565)
-3. [迭代法求解线性方程组](https://mp.weixin.qq.com/s?__biz=MzUxNzE2NjM0MA==&mid=2247484915&idx=1&sn=73f0190c445f7157ddfcfaf4a2a6c731&chksm=f99d0198ceea888ef47567682d8e86679c30ff07eade4e79efc9ba148403f76e967865b1b3d1&token=1966566026&lang=zh_CN#rd)
-4. [Jacobi迭代求解二维Possion方程实践](https://mp.weixin.qq.com/s?__biz=MzUxNzE2NjM0MA==&mid=2247484972&idx=1&sn=1285c1115aaecc5497315dd7cf047aa4&chksm=f99d0247ceea8b51c616838b1ebf2228a84d2b758753d3e90cb246eed808a97493bdd3103a93&token=1966566026&lang=zh_CN#rd)
+2. [fluiddynamics](https://meatfighter.com/fluiddynamics/GPU_Gems_Chapter_38.pdf)
+3. [NS推导过程](https://www.sohu.com/a/616386858_115565)
+4. [迭代法求解线性方程组](https://mp.weixin.qq.com/s?__biz=MzUxNzE2NjM0MA==&mid=2247484915&idx=1&sn=73f0190c445f7157ddfcfaf4a2a6c731&chksm=f99d0198ceea888ef47567682d8e86679c30ff07eade4e79efc9ba148403f76e967865b1b3d1&token=1966566026&lang=zh_CN#rd)
+5. [Jacobi迭代求解二维Possion方程实践](https://mp.weixin.qq.com/s?__biz=MzUxNzE2NjM0MA==&mid=2247484972&idx=1&sn=1285c1115aaecc5497315dd7cf047aa4&chksm=f99d0247ceea8b51c616838b1ebf2228a84d2b758753d3e90cb246eed808a97493bdd3103a93&token=1966566026&lang=zh_CN#rd)

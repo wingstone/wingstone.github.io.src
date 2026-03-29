@@ -6,6 +6,7 @@ categories:
 - water interaction
 tags: 
 - fluid physics
+draft: true
 ---
 
 归纳总结在gpu上试下流体模拟，主要总结gpu gems1上的一篇文章，在2d平面上模拟流体实现；
