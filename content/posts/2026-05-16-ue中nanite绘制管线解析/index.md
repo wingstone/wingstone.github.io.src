@@ -40,6 +40,12 @@ Visibility Buffer用来解决带宽与pixel overdraw问题，若没有vbuffer，
 在post pass使用当前帧构建的hzb对main pass剔除过的instance、meshlet再进行保守剔除，对未剔除的instance、meshlet再进行光栅化获取最终vbuffer，随后再构建当前帧最终的hzb；
 
 
+## Restarization
+
+光栅化分为采用cs的soft restarization与采用ps的hard restarization；在main pass与post pass中均会使用到restarization；
+
+具体实现可NaniteCullingRaster.cpp文件中的FRenderer::AddPass_Rasterize函数；
+
 
 ## Reference
 
